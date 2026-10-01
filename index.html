@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scheme Saheli</title>
+<meta name="description" content="Scheme Saheli – a voice-first friend for finding government help in Tamil, Telugu, Hindi and English.">
+<meta name="theme-color" content="#0F6B68">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Scheme Saheli">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F6B68'/%3E%3Ccircle cx='32' cy='24' r='10' fill='%23F4B63F'/%3E%3Cpath d='M12 54c0-12 8-18 20-18s20 6 20 18Z' fill='%23C2185B'/%3E%3C/svg%3E" type="image/svg+xml">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F6B68'/%3E%3Ccircle cx='32' cy='24' r='10' fill='%23F4B63F'/%3E%3Cpath d='M12 54c0-12 8-18 20-18s20 6 20 18Z' fill='%23C2185B'/%3E%3C/svg%3E">
+<style>
+:root{--ink:#12373A;--teal:#0F6B68;--gold:#F4B63F;--rani:#C2185B;--bg:#EAF4F0;--card:#fff;--line:#BFD9D2;--soft:#FFF1CC}
+@media (prefers-color-scheme:dark){:root{--ink:#E9F5F2;--teal:#5CC7C0;--bg:#0E2224;--card:#16373A;--line:#2D5A5C;--soft:#3A3318}}
+*{box-sizing:border-box}
+html{font-size:20px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Tamil","Noto Sans Telugu","Nirmala UI",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+#app{max-width:720px;margin:0 auto;padding:16px 16px 48px}
+button{font:inherit;cursor:pointer;min-height:56px;border-radius:16px;border:2px solid var(--teal);background:var(--card);color:var(--ink);padding:10px 18px}
+button:focus-visible,input:focus-visible{outline:4px solid var(--rani);outline-offset:2px}
+h1,h2,h3{line-height:1.25;margin:0 0 .4em}
+.brand{display:flex;align-items:center;gap:14px;margin:8px 0 16px}
+.brand svg{width:84px;height:84px;flex:none}
+.brand h1{font-size:1.9rem}
+.brand p{margin:0;font-size:1.05rem}
+.langs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.langs button{flex:1 1 40%;font-weight:700;padding:10px 8px}
+@media (min-width:520px){.langs button{flex:1 1 0}}
+.langs button[aria-pressed=true]{background:var(--teal);color:#fff}
+@media (prefers-color-scheme:dark){.langs button[aria-pressed=true]{color:#0E2224}}
+.big{width:100%;min-height:72px;font-size:1.3rem;font-weight:700;background:var(--rani);border-color:var(--rani);color:#fff;margin:6px 0 24px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.how{display:grid;gap:10px}
+.how .card{display:flex;gap:14px;align-items:center;margin:0}
+.how svg{width:52px;height:52px;flex:none}
+.how b{font-size:1.1rem}
+.row{display:flex;gap:8px;align-items:stretch}
+.row .open{flex:1;text-align:left;border-color:var(--line)}
+.row .open small{display:block;opacity:.75}
+.del{color:var(--rani);border-color:var(--rani)}
+.top{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.log{display:grid;gap:12px;margin:12px 0}
+.msg{max-width:92%;padding:12px 16px;border-radius:20px;font-size:1.1rem}
+.msg.bot{background:var(--card);border:2px solid var(--line);justify-self:start}
+.msg.user{background:var(--teal);color:#fff;justify-self:end}
+@media (prefers-color-scheme:dark){.msg.user{color:#0E2224}}
+.msg ol{padding-left:1.3em;margin:.5em 0}
+.msg li{margin-bottom:.4em}
+.sample{background:var(--soft);border-left:6px solid var(--gold);padding:8px 12px;border-radius:10px;font-size:.9rem;margin-top:8px}
+.msg .ls{min-height:44px;font-size:.95rem;margin-top:6px;padding:4px 14px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.chips button{font-weight:700;font-size:1.05rem}
+.input{display:flex;gap:8px;margin-top:12px}
+.input input{flex:1;min-width:0;font:inherit;font-size:1.1rem;padding:12px 14px;border-radius:16px;border:2px solid var(--teal);background:var(--card);color:var(--ink)}
+.input .send{background:var(--teal);color:#fff;font-weight:700}
+@media (prefers-color-scheme:dark){.input .send{color:#0E2224}}
+.micwrap{text-align:center;margin:16px 0}
+.mic{width:92px;height:92px;border-radius:50%;background:var(--rani);border-color:var(--rani);padding:0}
+.mic svg{width:44px;height:44px}
+.mic.on{animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 16px rgba(194,24,91,.25)}}
+@media (prefers-reduced-motion:reduce){.mic.on{animation:none;outline:6px solid var(--gold)}}
+.note{min-height:1.5em;font-weight:600;color:var(--rani);text-align:center}
+.saved{text-align:center;font-size:.95rem;opacity:.85}
+h2:focus{outline:none}
+.dlgback{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.dlgback[hidden]{display:none}
+.dlg{background:var(--card);color:var(--ink);border:3px solid var(--rani);border-radius:20px;padding:20px;max-width:420px;width:100%}
+.dlg p{margin:0 0 16px;font-size:1rem;word-break:break-word}
+.dlgbtns{display:flex;gap:10px}
+.dlgbtns button{flex:1;font-weight:700}
+.dlgbtns .danger{background:var(--rani);border-color:var(--rani);color:#fff}
+.step{display:grid;gap:8px}
+.step h3{font-size:1.15rem;margin:0}
+.step svg{width:100%;max-width:260px;height:auto;justify-self:center}
+.step p{margin:0}
+.num{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--rani);color:#fff;font-size:.9em;margin-right:6px}
+.stl{margin:.4em 0 0;padding-left:1.2em}
+.stl li{margin-bottom:.4em}
+.mic[aria-busy=true]{opacity:.7}
+#app{padding-bottom:110px}
+#stopbar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:5;pointer-events:none}
+#stopbar[hidden]{display:none}
+#stopbar button{pointer-events:auto;background:var(--rani);border-color:var(--rani);color:#fff;font-weight:700;font-size:1.15rem;min-width:240px;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.msg h3{font-size:1.15rem}
+.sh{font-size:1rem;margin:.9em 0 .3em}
+.hint{font-size:.85rem;opacity:.85;margin:.2em 0 .6em}
+.chk-list{display:grid;gap:8px}
+.chk{display:flex;gap:12px;align-items:center;text-align:left;width:100%;font-size:1rem;padding:8px 12px;min-height:56px}
+.chk .box{flex:none;width:30px;height:30px;border:3px solid var(--teal);border-radius:8px;display:grid;place-items:center;font-weight:900;background:var(--card)}
+.chk.on{background:var(--soft);border-color:var(--rani)}
+.chk.on .box{background:var(--rani);border-color:var(--rani);color:#fff}
+.callbtn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:56px;margin-top:10px;border:2px solid var(--rani);border-radius:16px;color:var(--rani);font-weight:700;text-decoration:none;padding:8px 14px;text-align:center}
+.callbtn:focus-visible{outline:4px solid var(--rani);outline-offset:2px}
+.count{font-weight:700;margin:.6em 0 .2em}
+.msg .chips button{font-size:.95rem;min-height:48px}
+.tintro{margin:0 0 12px}
+.tgrid{display:grid;gap:12px;margin:12px 0 20px}
+@media (min-width:560px){.tgrid{grid-template-columns:1fr 1fr}}
+.tcard{display:flex;align-items:center;gap:14px;text-align:left;width:100%;min-height:104px;padding:14px 16px;border-radius:20px;border-color:var(--line)}
+.tcard:hover,.tcard:active{border-color:var(--teal);background:var(--soft)}
+.tcard svg{width:56px;height:56px;flex:none}
+.tcard .tx{display:block}
+.tcard b{display:block;font-size:1.15rem;line-height:1.25}
+.tcard .tx span{display:block;font-size:.95rem;opacity:.85;margin-top:2px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div id="dlg" class="dlgback" hidden>
+ <div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgT" aria-describedby="dlgD">
+  <h2 id="dlgT"></h2><p id="dlgD"></p>
+  <div class="dlgbtns"><button type="button" id="dlgCancel" data-act="delcancel"></button><button type="button" id="dlgOk" class="danger" data-act="delok"></button></div>
+ </div>
+</div>
+<div id="stopbar" hidden><button type="button" id="stopSpeak" data-act="stopspeak"></button></div>
+<script>
+const LC={en:'en-IN',ta:'ta-IN',te:'te-IN',hi:'hi-IN'};
+const NAMES={ta:'தமிழ்',te:'తెలుగు',en:'English',hi:'हिन्दी'};
+const T={
+ "en": {
+  "cancel": "Cancel",
+  "tagline": "Your friend for finding help",
+  "testVoice": "Test voice",
+  "noSyn": "This browser cannot read aloud. Please read the written reply.",
+  "noTts": "No English voice was found on this device, so I cannot read aloud. Please read the written reply.",
+  "ttsFail": "I could not read this aloud. Please read the written reply.",
+  "micDenied": "The microphone is blocked. Allow the microphone in your browser settings, or type your answer.",
+  "micNone": "No microphone was found. Please type your answer.",
+  "micNet": "Voice needs an internet connection. Please try again, or type your answer.",
+  "micLang": "This browser cannot understand English speech. Please type your answer.",
+  "how": "How it works",
+  "h1": "Tell us what help you need.",
+  "h2": "Listen to a simple explanation.",
+  "h3": "Follow or save your next steps.",
+  "start": "Start a conversation",
+  "prev": "Earlier conversations",
+  "none": "No conversations yet. Press the big button above to begin.",
+  "home": "Home",
+  "ph": "Type here",
+  "send": "Send",
+  "mic": "Speak",
+  "listening": "Listening… please speak",
+  "noVoice": "Voice input does not work in this browser. Please type your answer.",
+  "voiceFail": "I could not hear you. Please try again, or type your answer.",
+  "listen": "Listen",
+  "stop": "Stop",
+  "listenAll": "Listen to everything",
+  "del": "Delete",
+  "delConfirm": "Delete this conversation?",
+  "topics": "Choose a topic or type",
+  "voiceUsed": "Voice used",
+  "saved": "Your conversation is saved on this device only.",
+  "newchat": "New conversation",
+  "sampleTag": "Sample information",
+  "greet": "Hello! I am Saheli. What help do you need? Tap a topic or tell me.",
+  "set": "Settings",
+  "tut": "Language voice setup",
+  "i1": "Two separate features: Listening (speech recognition) lets the app hear you. Reading aloud (text-to-speech) lets the app speak its replies.",
+  "i2": "Installing a reading voice may not turn on listening. Menu names and language packs are different on every device.",
+  "i3": "Written replies and typing always work, even without voice.",
+  "plat": "Choose your device",
+  "stT": "What this device reports",
+  "ttsOk": "Reading aloud: a voice was found – ",
+  "srOk": "Listening: this browser has speech recognition. Whether it understands English is only known when you try.",
+  "perm": "Microphone permission: ",
+  "pg": "allowed",
+  "pp": "not asked yet",
+  "pd": "blocked",
+  "pu": "unknown",
+  "caps": [
+   "Open Settings",
+   "Find language or text-to-speech",
+   "Install or turn on the voice",
+   "Come back and try again"
+  ],
+  "alts": [
+   "Picture: a gear icon for device settings",
+   "Picture: a list with a globe and a speaker",
+   "Picture: a download arrow next to a speaker",
+   "Picture: the Saheli app with a microphone"
+  ],
+  "and": [
+   "Open the Settings app (gear icon). If you cannot find it, swipe down from the top of the screen and tap the gear.",
+   "Search for \"text-to-speech\", or open System > Languages. On some phones it is under Accessibility.",
+   "Open the Text-to-speech settings, choose your language and download its voice data if it is offered. For listening, check Voice typing under Languages.",
+   "Open Scheme Saheli again, tap {T}, then tap {S}."
+  ],
+  "win": [
+   "Press the Windows key + I, or open Start and click Settings.",
+   "Open Time & language > Speech to see voices, or Language & region to add a language.",
+   "Choose Add voices and pick your language. In Language & region, add the language and tick the Text-to-speech and Speech recognition options if you see them.",
+   "Reload Scheme Saheli, tap {T}, then tap {S}."
+  ],
+  "micHelp": "To change this: tap the lock or settings icon next to the web address, open Site settings, set Microphone to Allow, then reload this page. You can type in the meantime.",
+  "micInsecure": "This page is not on a secure address, so the browser may ask for the microphone every time. Open it from an https:// address or localhost.",
+  "stepsTitle": "Sample next steps",
+  "docsTitle": "Document checklist",
+  "docsHint": "Tap each paper when you have it ready.",
+  "ready": "{n} of {m} ready",
+  "copy": "Copy checklist",
+  "share": "Share on WhatsApp",
+  "copied": "Checklist copied.",
+  "copyFail": "Copying did not work on this device. Please try Share on WhatsApp.",
+  "waOpen": "Opening WhatsApp… If it does not open, please use Copy.",
+  "stopSpeak": "Stop speaking",
+  "shareFrom": "Shared from Scheme Saheli",
+  "schLbl": "Example schemes you can ask about:",
+  "thinking": "Finding your answer…"
+ },
+ "ta": {
+  "cancel": "ரத்து செய்",
+  "tagline": "உங்களுக்கு உதவும் தோழி",
+  "testVoice": "குரலைச் சோதிக்க",
+  "noSyn": "இந்த உலாவியால் வாசித்துக் காட்ட முடியாது. எழுத்தில் உள்ள பதிலைப் படியுங்கள்.",
+  "noTts": "இந்த சாதனத்தில் தமிழ் குரல் இல்லை, அதனால் வாசிக்க முடியாது. எழுத்தில் உள்ள பதிலைப் படியுங்கள்.",
+  "ttsFail": "இதை வாசிக்க முடியவில்லை. எழுத்தில் உள்ள பதிலைப் படியுங்கள்.",
+  "micDenied": "மைக்ரோஃபோன் தடுக்கப்பட்டுள்ளது. உலாவி அமைப்புகளில் அனுமதியுங்கள் அல்லது எழுதுங்கள்.",
+  "micNone": "மைக்ரோஃபோன் கிடைக்கவில்லை. தயவுசெய்து எழுதுங்கள்.",
+  "micNet": "குரலுக்கு இணைய இணைப்பு தேவை. மீண்டும் முயலுங்கள் அல்லது எழுதுங்கள்.",
+  "micLang": "இந்த உலாவியால் தமிழ்க் குரலைப் புரிந்துகொள்ள முடியவில்லை. தயவுசெய்து எழுதுங்கள்.",
+  "how": "எப்படி வேலை செய்கிறது",
+  "h1": "என்ன உதவி வேண்டும் என்று சொல்லுங்கள்.",
+  "h2": "எளிய விளக்கத்தைக் கேளுங்கள்.",
+  "h3": "அடுத்த படிகளைப் பின்பற்றுங்கள் அல்லது சேமியுங்கள்.",
+  "start": "உரையாடலைத் தொடங்குங்கள்",
+  "prev": "முந்தைய உரையாடல்கள்",
+  "none": "இன்னும் உரையாடல்கள் இல்லை. மேலே உள்ள பெரிய பொத்தானை அழுத்துங்கள்.",
+  "home": "முகப்பு",
+  "ph": "இங்கே எழுதுங்கள்",
+  "send": "அனுப்பு",
+  "mic": "பேசுங்கள்",
+  "listening": "கேட்கிறேன்… பேசுங்கள்",
+  "noVoice": "இந்த உலாவியில் குரல் உள்ளீடு வேலை செய்யாது. தயவுசெய்து எழுதுங்கள்.",
+  "voiceFail": "உங்கள் குரல் கேட்கவில்லை. மீண்டும் முயலுங்கள் அல்லது எழுதுங்கள்.",
+  "listen": "கேளுங்கள்",
+  "stop": "நிறுத்து",
+  "listenAll": "அனைத்தையும் கேளுங்கள்",
+  "del": "நீக்கு",
+  "delConfirm": "இந்த உரையாடலை நீக்கலாமா?",
+  "topics": "ஒரு தலைப்பைத் தேர்ந்தெடுங்கள் அல்லது எழுதுங்கள்",
+  "voiceUsed": "குரல் பயன்படுத்தப்பட்டது",
+  "saved": "உங்கள் உரையாடல் இந்த சாதனத்தில் மட்டும் சேமிக்கப்பட்டது.",
+  "newchat": "புதிய உரையாடல்",
+  "sampleTag": "மாதிரி தகவல்",
+  "greet": "வணக்கம்! நான் சகி. உங்களுக்கு என்ன உதவி வேண்டும்? ஒரு தலைப்பைத் தொடுங்கள் அல்லது சொல்லுங்கள்.",
+  "set": "அமைப்புகள்",
+  "tut": "மொழிக் குரல் அமைப்பு",
+  "i1": "இரண்டு வெவ்வேறு வசதிகள்: கேட்டல் (பேச்சு அறிதல்) ஆப் உங்கள் பேச்சைக் கேட்க உதவும். வாசித்தல் (உரையிலிருந்து பேச்சு) ஆப் பதில்களை உரக்கப் படிக்க உதவும்.",
+  "i2": "வாசிக்கும் குரலை நிறுவினால் கேட்டல் தானாக இயங்காமல் போகலாம். மெனு பெயர்களும் மொழித் தொகுப்புகளும் ஒவ்வொரு சாதனத்திலும் வேறுபடும்.",
+  "i3": "குரல் இல்லாவிட்டாலும் எழுத்துப் பதில்களும் தட்டச்சும் எப்போதும் வேலை செய்யும்.",
+  "plat": "உங்கள் சாதனத்தைத் தேர்ந்தெடுங்கள்",
+  "stT": "இந்த சாதனம் தெரிவிப்பது",
+  "ttsOk": "வாசித்தல்: ஒரு குரல் கிடைத்தது – ",
+  "srOk": "கேட்டல்: இந்த உலாவியில் பேச்சு அறிதல் உள்ளது. அது தமிழைப் புரிந்துகொள்கிறதா என்பது முயன்று பார்த்தால்தான் தெரியும்.",
+  "perm": "மைக்ரோஃபோன் அனுமதி: ",
+  "pg": "அனுமதிக்கப்பட்டது",
+  "pp": "இன்னும் கேட்கவில்லை",
+  "pd": "தடுக்கப்பட்டது",
+  "pu": "தெரியவில்லை",
+  "caps": [
+   "அமைப்புகளைத் திறக்கவும்",
+   "மொழி அல்லது உரையிலிருந்து பேச்சு அமைப்பைத் தேடவும்",
+   "குரலை நிறுவவும் அல்லது இயக்கவும்",
+   "திரும்பி வந்து மீண்டும் முயலவும்"
+  ],
+  "alts": [
+   "படம்: சாதன அமைப்புகளுக்கான கியர் குறி",
+   "படம்: உலகக் குறியும் ஒலிபெருக்கியும் உள்ள பட்டியல்",
+   "படம்: ஒலிபெருக்கி அருகில் பதிவிறக்க அம்பு",
+   "படம்: மைக்ரோஃபோனுடன் சகி ஆப்"
+  ],
+  "and": [
+   "அமைப்புகள் (கியர் குறி) ஆப்பைத் திறக்கவும். கிடைக்கவில்லை என்றால் திரையின் மேலிருந்து கீழே இழுத்து கியரைத் தொடவும்.",
+   "\"Text-to-speech\" எனத் தேடவும், அல்லது System > Languages திறக்கவும். சில போன்களில் இது Accessibility-க்குள் இருக்கும்.",
+   "Text-to-speech அமைப்பைத் திறந்து, உங்கள் மொழியைத் தேர்ந்து, வழங்கப்பட்டால் அதன் குரல் தரவைப் பதிவிறக்கவும். கேட்டலுக்கு, Languages-இல் Voice typing-ஐப் பார்க்கவும்.",
+   "Scheme Saheli-ஐ மீண்டும் திறந்து, \"{T}\" என்பதைத் தொட்டு, பிறகு \"{S}\" என்பதைத் தொடவும்."
+  ],
+  "win": [
+   "Windows விசை + I அழுத்தவும், அல்லது Start திறந்து Settings-ஐத் தேர்ந்தெடுக்கவும்.",
+   "குரல்களைப் பார்க்க Time & language > Speech திறக்கவும்; மொழியைச் சேர்க்க Language & region திறக்கவும்.",
+   "Add voices தேர்ந்து உங்கள் மொழியைத் தேர்ந்தெடுக்கவும். Language & region-இல் மொழியைச் சேர்த்து, Text-to-speech, Speech recognition தேர்வுகள் தெரிந்தால் டிக் செய்யவும்.",
+   "Scheme Saheli-ஐ மீண்டும் ஏற்றி, \"{T}\" என்பதைத் தொட்டு, பிறகு \"{S}\" என்பதைத் தொடவும்."
+  ],
+  "micHelp": "இதை மாற்ற: இணைய முகவரிக்கு அருகில் உள்ள பூட்டு அல்லது அமைப்புக் குறியைத் தொட்டு, Site settings திறந்து, Microphone-ஐ Allow என மாற்றி, பக்கத்தை மீண்டும் ஏற்றவும். இதற்கிடையில் எழுதலாம்.",
+  "micInsecure": "இந்தப் பக்கம் பாதுகாப்பான முகவரியில் இல்லை, அதனால் உலாவி ஒவ்வொரு முறையும் மைக்ரோஃபோன் அனுமதி கேட்கலாம். https:// முகவரியிலிருந்து அல்லது localhost-இலிருந்து திறக்கவும்.",
+  "stepsTitle": "மாதிரி அடுத்த படிகள்",
+  "docsTitle": "ஆவணப் பட்டியல்",
+  "docsHint": "ஒவ்வொரு ஆவணமும் தயாரானதும் அதைத் தொடுங்கள்.",
+  "ready": "{m}-இல் {n} தயார்",
+  "copy": "பட்டியலை நகலெடு",
+  "share": "வாட்ஸ்அப்பில் பகிர்",
+  "copied": "பட்டியல் நகலெடுக்கப்பட்டது.",
+  "copyFail": "இந்த சாதனத்தில் நகலெடுக்க முடியவில்லை. வாட்ஸ்அப்பில் பகிர்ந்து பாருங்கள்.",
+  "waOpen": "வாட்ஸ்அப் திறக்கிறது… திறக்கவில்லை என்றால் நகலெடுக்கவும்.",
+  "stopSpeak": "வாசிப்பை நிறுத்து",
+  "shareFrom": "சகி ஆப்பிலிருந்து பகிரப்பட்டது",
+  "schLbl": "கேட்டுப் பார்க்க வேண்டிய எடுத்துக்காட்டுத் திட்டங்கள்:",
+  "thinking": "பதிலைத் தேடுகிறேன்…"
+ },
+ "te": {
+  "cancel": "రద్దు చేయి",
+  "tagline": "మీకు సహాయం చేసే స్నేహితురాలు",
+  "testVoice": "వాయిస్ పరీక్షించండి",
+  "noSyn": "ఈ బ్రౌజర్ చదివి వినిపించలేదు. రాసిన సమాధానాన్ని చదవండి.",
+  "noTts": "ఈ పరికరంలో తెలుగు వాయిస్ లేదు, కాబట్టి చదివి వినిపించలేను. రాసిన సమాధానాన్ని చదవండి.",
+  "ttsFail": "దీన్ని చదివి వినిపించలేకపోయాను. రాసిన సమాధానాన్ని చదవండి.",
+  "micDenied": "మైక్రోఫోన్ నిరోధించబడింది. బ్రౌజర్ సెట్టింగ్స్‌లో అనుమతించండి లేదా రాయండి.",
+  "micNone": "మైక్రోఫోన్ కనిపించలేదు. దయచేసి రాయండి.",
+  "micNet": "వాయిస్‌కు ఇంటర్నెట్ కావాలి. మళ్లీ ప్రయత్నించండి లేదా రాయండి.",
+  "micLang": "ఈ బ్రౌజర్ తెలుగు మాటలను అర్థం చేసుకోలేదు. దయచేసి రాయండి.",
+  "how": "ఇది ఎలా పనిచేస్తుంది",
+  "h1": "మీకు ఏ సహాయం కావాలో చెప్పండి.",
+  "h2": "సులభమైన వివరణ వినండి.",
+  "h3": "తదుపరి అడుగులు పాటించండి లేదా సేవ్ చేయండి.",
+  "start": "సంభాషణ ప్రారంభించండి",
+  "prev": "గత సంభాషణలు",
+  "none": "ఇంకా సంభాషణలు లేవు. పైన ఉన్న పెద్ద బటన్ నొక్కండి.",
+  "home": "హోమ్",
+  "ph": "ఇక్కడ రాయండి",
+  "send": "పంపు",
+  "mic": "మాట్లాడండి",
+  "listening": "వింటున్నాను… మాట్లాడండి",
+  "noVoice": "ఈ బ్రౌజర్‌లో వాయిస్ ఇన్‌పుట్ పనిచేయదు. దయచేసి రాయండి.",
+  "voiceFail": "మీ గొంతు వినిపించలేదు. మళ్లీ ప్రయత్నించండి లేదా రాయండి.",
+  "listen": "వినండి",
+  "stop": "ఆపు",
+  "listenAll": "అన్నీ వినండి",
+  "del": "తొలగించు",
+  "delConfirm": "ఈ సంభాషణను తొలగించాలా?",
+  "topics": "ఒక అంశం ఎంచుకోండి లేదా రాయండి",
+  "voiceUsed": "వాయిస్ వాడారు",
+  "saved": "మీ సంభాషణ ఈ పరికరంలో మాత్రమే సేవ్ అయింది.",
+  "newchat": "కొత్త సంభాషణ",
+  "sampleTag": "నమూనా సమాచారం",
+  "greet": "నమస్కారం! నేను సఖి. మీకు ఏ సహాయం కావాలి? ఒక అంశాన్ని నొక్కండి లేదా చెప్పండి.",
+  "set": "సెట్టింగ్స్",
+  "tut": "భాషా వాయిస్ సెటప్",
+  "i1": "రెండు వేర్వేరు సదుపాయాలు: వినడం (స్పీచ్ రికగ్నిషన్) వల్ల యాప్ మీ మాటలు వింటుంది. చదివి వినిపించడం (టెక్స్ట్-టు-స్పీచ్) వల్ల యాప్ సమాధానాలను గట్టిగా చదువుతుంది.",
+  "i2": "చదివే వాయిస్ ఇన్‌స్టాల్ చేసినంత మాత్రాన వినడం ఆన్ కాకపోవచ్చు. మెనూ పేర్లు, భాషా ప్యాక్‌లు ప్రతి పరికరంలో వేరుగా ఉంటాయి.",
+  "i3": "వాయిస్ లేకపోయినా రాసిన సమాధానాలు, టైపింగ్ ఎప్పుడూ పనిచేస్తాయి.",
+  "plat": "మీ పరికరాన్ని ఎంచుకోండి",
+  "stT": "ఈ పరికరం తెలిపేది",
+  "ttsOk": "చదివి వినిపించడం: ఒక వాయిస్ దొరికింది – ",
+  "srOk": "వినడం: ఈ బ్రౌజర్‌లో స్పీచ్ రికగ్నిషన్ ఉంది. ఇది తెలుగును అర్థం చేసుకుంటుందో లేదో ప్రయత్నిస్తేనే తెలుస్తుంది.",
+  "perm": "మైక్రోఫోన్ అనుమతి: ",
+  "pg": "అనుమతించబడింది",
+  "pp": "ఇంకా అడగలేదు",
+  "pd": "నిరోధించబడింది",
+  "pu": "తెలియదు",
+  "caps": [
+   "సెట్టింగ్స్ తెరవండి",
+   "భాష లేదా టెక్స్ట్-టు-స్పీచ్ వెతకండి",
+   "వాయిస్‌ను ఇన్‌స్టాల్ చేయండి లేదా ఆన్ చేయండి",
+   "తిరిగి వచ్చి మళ్లీ ప్రయత్నించండి"
+  ],
+  "alts": [
+   "చిత్రం: పరికర సెట్టింగ్స్ కోసం గేర్ గుర్తు",
+   "చిత్రం: భూగోళం, స్పీకర్ ఉన్న జాబితా",
+   "చిత్రం: స్పీకర్ పక్కన డౌన్‌లోడ్ బాణం",
+   "చిత్రం: మైక్రోఫోన్‌తో సఖి యాప్"
+  ],
+  "and": [
+   "సెట్టింగ్స్ (గేర్ గుర్తు) యాప్ తెరవండి. కనిపించకపోతే స్క్రీన్ పై నుండి కిందికి లాగి గేర్ నొక్కండి.",
+   "\"Text-to-speech\" అని వెతకండి, లేదా System > Languages తెరవండి. కొన్ని ఫోన్లలో ఇది Accessibility లోపల ఉంటుంది.",
+   "Text-to-speech సెట్టింగ్స్ తెరిచి, మీ భాషను ఎంచుకుని, ఇస్తే దాని వాయిస్ డేటా డౌన్‌లోడ్ చేయండి. వినడం కోసం Languages లో Voice typing చూడండి.",
+   "Scheme Saheli మళ్లీ తెరిచి, \"{T}\" నొక్కి, తర్వాత \"{S}\" నొక్కండి."
+  ],
+  "win": [
+   "Windows కీ + I నొక్కండి, లేదా Start తెరిచి Settings ఎంచుకోండి.",
+   "వాయిస్‌లు చూడడానికి Time & language > Speech తెరవండి; భాష చేర్చడానికి Language & region తెరవండి.",
+   "Add voices ఎంచుకుని మీ భాషను ఎంచుకోండి. Language & region లో భాషను చేర్చి, Text-to-speech, Speech recognition ఎంపికలు కనిపిస్తే టిక్ చేయండి.",
+   "Scheme Saheli ను రీలోడ్ చేసి, \"{T}\" నొక్కి, తర్వాత \"{S}\" నొక్కండి."
+  ],
+  "micHelp": "మార్చడానికి: వెబ్ అడ్రస్ పక్కన ఉన్న తాళం లేదా సెట్టింగ్స్ గుర్తు నొక్కి, Site settings తెరిచి, Microphone ను Allow చేసి, ఈ పేజీని రీలోడ్ చేయండి. ఈలోగా రాయవచ్చు.",
+  "micInsecure": "ఈ పేజీ సురక్షిత అడ్రస్‌లో లేదు, అందుకే బ్రౌజర్ ప్రతిసారీ మైక్రోఫోన్ అనుమతి అడగవచ్చు. https:// అడ్రస్ నుండి లేదా localhost నుండి తెరవండి.",
+  "stepsTitle": "నమూనా తదుపరి అడుగులు",
+  "docsTitle": "పత్రాల జాబితా",
+  "docsHint": "ప్రతి పత్రం సిద్ధమైనప్పుడు దాన్ని నొక్కండి.",
+  "ready": "{m}లో {n} సిద్ధం",
+  "copy": "జాబితాను కాపీ చేయండి",
+  "share": "వాట్సాప్‌లో షేర్ చేయండి",
+  "copied": "జాబితా కాపీ అయింది.",
+  "copyFail": "ఈ పరికరంలో కాపీ చేయడం కుదరలేదు. వాట్సాప్‌లో షేర్ చేసి చూడండి.",
+  "waOpen": "వాట్సాప్ తెరుస్తోంది… తెరుచుకోకపోతే కాపీ చేయండి.",
+  "stopSpeak": "చదవడం ఆపండి",
+  "shareFrom": "సఖి యాప్ నుండి షేర్ చేయబడింది",
+  "schLbl": "అడిగి తెలుసుకోవాల్సిన ఉదాహరణ పథకాలు:",
+  "thinking": "మీ సమాధానం వెతుకుతున్నాను…"
+ },
+ "hi": {
+  "cancel": "रद्द करें",
+  "tagline": "आपकी मदद ढूँढने वाली सखी",
+  "testVoice": "आवाज़ जाँचें",
+  "noSyn": "यह ब्राउज़र बोलकर पढ़ नहीं सकता। कृपया लिखा हुआ जवाब पढ़ें।",
+  "noTts": "इस डिवाइस में हिन्दी आवाज़ नहीं मिली, इसलिए मैं बोलकर नहीं पढ़ सकती। कृपया लिखा हुआ जवाब पढ़ें। फ़ोन की टेक्स्ट-टू-स्पीच सेटिंग में हिन्दी आवाज़ जोड़ी जा सकती है।",
+  "ttsFail": "मैं इसे बोलकर नहीं पढ़ पाई। कृपया लिखा हुआ जवाब पढ़ें।",
+  "micDenied": "माइक्रोफ़ोन बंद है। ब्राउज़र की सेटिंग में माइक्रोफ़ोन की अनुमति दें, या अपना जवाब लिखें।",
+  "micNone": "माइक्रोफ़ोन नहीं मिला। कृपया अपना जवाब लिखें।",
+  "micNet": "आवाज़ के लिए इंटरनेट चाहिए। दोबारा कोशिश करें, या अपना जवाब लिखें।",
+  "micLang": "यह ब्राउज़र हिन्दी बोली नहीं समझ सकता। कृपया अपना जवाब लिखें।",
+  "how": "यह कैसे काम करता है",
+  "h1": "बताइए आपको किस मदद की ज़रूरत है।",
+  "h2": "एक आसान समझाइश सुनिए।",
+  "h3": "अगले कदमों का पालन करें या उन्हें सहेजें।",
+  "start": "बातचीत शुरू करें",
+  "prev": "पिछली बातचीत",
+  "none": "अभी कोई बातचीत नहीं है। शुरू करने के लिए ऊपर का बड़ा बटन दबाएँ।",
+  "home": "होम",
+  "ph": "यहाँ लिखें",
+  "send": "भेजें",
+  "mic": "बोलें",
+  "listening": "सुन रही हूँ… कृपया बोलें",
+  "noVoice": "इस ब्राउज़र में आवाज़ से इनपुट काम नहीं करता। कृपया अपना जवाब लिखें।",
+  "voiceFail": "मुझे आपकी आवाज़ सुनाई नहीं दी। दोबारा कोशिश करें, या अपना जवाब लिखें।",
+  "listen": "सुनें",
+  "stop": "रोकें",
+  "listenAll": "सब कुछ सुनें",
+  "del": "हटाएँ",
+  "delConfirm": "क्या यह बातचीत हटानी है?",
+  "topics": "कोई विषय चुनें या लिखें",
+  "voiceUsed": "आवाज़ का उपयोग हुआ",
+  "saved": "आपकी बातचीत सिर्फ़ इसी डिवाइस पर सहेजी गई है।",
+  "newchat": "नई बातचीत",
+  "sampleTag": "नमूना जानकारी",
+  "greet": "नमस्ते! मैं सखी हूँ। आपको किस मदद की ज़रूरत है? कोई विषय दबाएँ या मुझे बताएँ।",
+  "set": "सेटिंग",
+  "tut": "भाषा आवाज़ सेटअप",
+  "i1": "दो अलग सुविधाएँ: सुनना (स्पीच रिकग्निशन) से ऐप आपकी बात सुनता है। बोलकर पढ़ना (टेक्स्ट-टू-स्पीच) से ऐप जवाब ज़ोर से पढ़ता है।",
+  "i2": "पढ़ने वाली आवाज़ इंस्टॉल करने से सुनना चालू नहीं भी हो सकता। मेन्यू के नाम और भाषा पैक हर डिवाइस पर अलग होते हैं।",
+  "i3": "आवाज़ न हो तब भी लिखे हुए जवाब और टाइपिंग हमेशा काम करते हैं।",
+  "plat": "अपना डिवाइस चुनें",
+  "stT": "यह डिवाइस क्या बताता है",
+  "ttsOk": "बोलकर पढ़ना: एक आवाज़ मिली – ",
+  "srOk": "सुनना: इस ब्राउज़र में स्पीच रिकग्निशन है। वह हिन्दी समझता है या नहीं, यह कोशिश करने पर ही पता चलेगा।",
+  "perm": "माइक्रोफ़ोन अनुमति: ",
+  "pg": "मिली हुई है",
+  "pp": "अभी माँगी नहीं गई",
+  "pd": "बंद है",
+  "pu": "पता नहीं",
+  "caps": [
+   "सेटिंग खोलें",
+   "भाषा या टेक्स्ट-टू-स्पीच ढूँढें",
+   "आवाज़ इंस्टॉल करें या चालू करें",
+   "वापस आकर फिर कोशिश करें"
+  ],
+  "alts": [
+   "चित्र: डिवाइस सेटिंग का गियर चिह्न",
+   "चित्र: ग्लोब और स्पीकर वाली सूची",
+   "चित्र: स्पीकर के पास डाउनलोड तीर",
+   "चित्र: माइक्रोफ़ोन के साथ सखी ऐप"
+  ],
+  "and": [
+   "सेटिंग (गियर चिह्न) ऐप खोलें। न मिले तो स्क्रीन के ऊपर से नीचे खींचकर गियर दबाएँ।",
+   "\"Text-to-speech\" खोजें, या System > Languages खोलें। कुछ फ़ोन में यह Accessibility के अंदर होता है।",
+   "Text-to-speech सेटिंग खोलें, अपनी भाषा चुनें और अगर दिया हो तो उसका वॉइस डेटा डाउनलोड करें। सुनने के लिए Languages में Voice typing देखें।",
+   "Scheme Saheli फिर खोलें, \"{T}\" दबाएँ, फिर \"{S}\" दबाएँ।"
+  ],
+  "win": [
+   "Windows कुंजी + I दबाएँ, या Start खोलकर Settings चुनें।",
+   "आवाज़ें देखने के लिए Time & language > Speech खोलें; भाषा जोड़ने के लिए Language & region खोलें।",
+   "Add voices चुनकर अपनी भाषा चुनें। Language & region में भाषा जोड़ें और Text-to-speech, Speech recognition के विकल्प दिखें तो उन्हें टिक करें।",
+   "Scheme Saheli फिर लोड करें, \"{T}\" दबाएँ, फिर \"{S}\" दबाएँ।"
+  ],
+  "micHelp": "बदलने के लिए: वेब पते के पास ताले या सेटिंग के चिह्न को दबाएँ, Site settings खोलें, Microphone को Allow करें, फिर यह पेज दोबारा लोड करें। तब तक आप लिख सकते हैं।",
+  "micInsecure": "यह पेज सुरक्षित पते पर नहीं है, इसलिए ब्राउज़र हर बार माइक्रोफ़ोन की अनुमति माँग सकता है। इसे https:// पते से या localhost से खोलें।",
+  "stepsTitle": "अगले कदमों के उदाहरण",
+  "docsTitle": "दस्तावेज़ों की सूची",
+  "docsHint": "हर कागज़ तैयार होने पर उसे दबाएँ।",
+  "ready": "{m} में से {n} तैयार",
+  "copy": "सूची कॉपी करें",
+  "share": "व्हाट्सऐप पर भेजें",
+  "copied": "सूची कॉपी हो गई।",
+  "copyFail": "इस डिवाइस पर कॉपी नहीं हो पाई। कृपया व्हाट्सऐप पर भेजकर देखें।",
+  "waOpen": "व्हाट्सऐप खुल रहा है… न खुले तो कॉपी करें।",
+  "stopSpeak": "बोलना बंद करें",
+  "shareFrom": "सखी ऐप से भेजा गया",
+  "schLbl": "पूछने के लिए उदाहरण योजनाएँ:",
+  "thinking": "आपका जवाब ढूँढ रही हूँ…"
+ }
+};
+const ART=[
+'<rect x="36" y="6" width="48" height="78" rx="9" fill="none" stroke="#12373A" stroke-width="4"/><circle cx="60" cy="45" r="14" fill="none" stroke="#0F6B68" stroke-width="8" stroke-dasharray="6 5.5"/><circle cx="60" cy="45" r="12" fill="#0F6B68"/><circle cx="60" cy="45" r="5" fill="#fff"/>',
+'<rect x="14" y="10" width="76" height="20" rx="8" fill="#F4B63F"/><circle cx="30" cy="20" r="6" fill="none" stroke="#12373A" stroke-width="2.5"/><path d="M24 20h12M30 14v12" stroke="#12373A" stroke-width="2"/><rect x="14" y="36" width="76" height="20" rx="8" fill="#0F6B68"/><path d="M24 46h5l6-5v14l-6-5h-5z" fill="#fff"/><path d="M40 42q4 4 0 8" stroke="#fff" stroke-width="2.5" fill="none"/><rect x="14" y="62" width="76" height="20" rx="8" fill="#BFD9D2"/><circle cx="92" cy="66" r="11" fill="#fff" stroke="#C2185B" stroke-width="5"/><path d="M100 74l10 10" stroke="#C2185B" stroke-width="6" stroke-linecap="round"/>',
+'<path d="M14 36h14l18-16v50L28 54H14z" fill="#0F6B68"/><path d="M54 32q8 13 0 26" stroke="#0F6B68" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M84 14v36M70 38l14 14 14-14" stroke="#C2185B" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M68 70h32" stroke="#12373A" stroke-width="6" stroke-linecap="round"/><circle cx="28" cy="76" r="10" fill="#2E9E5B"/><path d="M23 76l4 4 7-8" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>',
+'<rect x="30" y="6" width="44" height="78" rx="9" fill="none" stroke="#12373A" stroke-width="4"/><circle cx="52" cy="30" r="11" fill="#F4B63F"/><path d="M47 31q5 5 10 0" stroke="#12373A" stroke-width="2.5" fill="none"/><circle cx="52" cy="62" r="11" fill="#C2185B"/><rect x="49" y="55" width="6" height="11" rx="3" fill="#fff"/><path d="M85 52q6 10 0 20M94 46q10 16 0 32" stroke="#C2185B" stroke-width="4" fill="none" stroke-linecap="round"/>'
+];
+
+
+const SYN='speechSynthesis' in window;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let lang='en',convs=[],cur=null,view='home';
+let tplat=/Android/i.test(navigator.userAgent)?'a':'w';
+let micState='idle',micPerm='unknown',micBlocked=false,recog=null,micCtx={},micTimer=null;
+const INSEC=!window.isSecureContext||location.protocol==='file:';
+try{lang=localStorage.getItem('saheli_lang')||'en';convs=JSON.parse(localStorage.getItem('saheli_convs')||'[]')}catch(e){}
+const ui=()=>T[lang];
+function persist(){try{localStorage.setItem('saheli_convs',JSON.stringify(convs));return true}catch(e){return false}}
+function uid(){let id;do{id='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}while(convs.some(c=>c.id===id));return id}
+(function migrate(){
+ if(!Array.isArray(convs))convs=[];
+ convs=convs.filter(c=>c&&Array.isArray(c.msgs));
+ const seen=new Set();let changed=false;
+ convs.forEach(c=>{
+  if(!T[c.lang])c.lang='en';
+  if(typeof c.id!=='string'||!c.id||seen.has(c.id)){c.id=uid();changed=true}
+  seen.add(c.id);c.stored=true;
+ });
+ if(changed)persist();
+})();
+
+let ttsWarn='';
+function setTts(t){ttsWarn=t;const e=$('#tts');if(e)e.textContent=t}
+let speaking=false,spLang='en',spId=0,spStart=0;
+function setSpeaking(b,l){
+ speaking=b;if(l)spLang=l;
+ const bar=$('#stopbar');if(!bar)return;
+ bar.hidden=!b;
+ if(b)$('#stopSpeak').textContent='⏹ '+T[spLang].stopSpeak;
+}
+function stopSpeech(){spId++;setSpeaking(false);if(SYN)speechSynthesis.cancel()}
+setInterval(()=>{if(speaking&&SYN&&Date.now()-spStart>2500&&!speechSynthesis.speaking&&!speechSynthesis.pending)setSpeaking(false)},600);
+function findVoice(l){
+ if(!SYN)return null;
+ const norm=x=>(x||'').replace('_','-').toLowerCase(),vs=speechSynthesis.getVoices();
+ return vs.find(v=>norm(v.lang)===LC[l].toLowerCase())||vs.find(v=>norm(v.lang).split('-')[0]===l)||null;
+}
+function speak(text,l){
+ stopSpeech();const u=T[l];
+ if(!SYN){setTts(u.noSyn);return}
+ setTts('');
+ const my=spId;spStart=Date.now();setSpeaking(true,l);
+ const run=()=>{
+  if(my!==spId)return;
+  const v=findVoice(l);
+  if(!v){setTts(u.noTts);setSpeaking(false);return}
+  const ut=new SpeechSynthesisUtterance(text);ut.voice=v;ut.lang=v.lang;ut.rate=.9;
+  ut.onend=()=>{if(my===spId)setSpeaking(false)};
+  ut.onerror=ev=>{if(my===spId)setSpeaking(false);if(ev.error!=='canceled'&&ev.error!=='interrupted')setTts(u.ttsFail)};
+  speechSynthesis.speak(ut);
+ };
+ if(speechSynthesis.getVoices().length)run();
+ else{let d=false;const f=()=>{if(d)return;d=true;speechSynthesis.removeEventListener('voiceschanged',f);run()};speechSynthesis.addEventListener('voiceschanged',f);setTimeout(f,1500)}
+}
+function stopAll(){stopSpeech();haltRec(true)}
+/* ---- Scheme data: from the API only if API_BASE is set, otherwise the embedded catalog (SahelCatalog, defined below) ---- */
+const API_BASE='';                       // empty = standalone (no network calls). Set e.g. 'https://your-app.vercel.app' to use a remote API
+const catCache={},pending=new Set();
+const catFor=l=>catCache[l]||SahelCatalog.getCatalog(l);
+const apiOn=()=>typeof API_BASE==='string'&&API_BASE!==''&&location.protocol!=='file:';
+function apiJson(path,opt){
+ const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),8000);
+ return fetch(API_BASE+path,Object.assign({signal:ac.signal},opt)).then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()}).finally(()=>clearTimeout(tm));
+}
+function goodCat(d){
+ return d&&Array.isArray(d.schemes)&&d.schemes.length&&d.schemes.every(x=>x&&typeof x.id==='string'&&typeof x.name==='string'&&Array.isArray(x.nextSteps)&&Array.isArray(x.documents))
+  &&typeof d.notice==='string'&&typeof d.disclaimer==='string'&&typeof d.documentsNote==='string'
+  &&d.helpline&&typeof d.helpline.callLabel==='string'&&typeof d.helpline.note==='string'&&/^tel:\+?[0-9\-]+$/.test(d.helpline.tel);
+}
+function loadCat(l){
+ if(!apiOn())return;
+ apiJson('/api/schemes?language='+l).then(d=>{if(goodCat(d))catCache[l]=d}).catch(()=>{});
+}
+async function askChat(text,l){
+ if(apiOn()){
+  try{
+   const d=await apiJson('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text.slice(0,(window.SahelCatalog?.MAX_MESSAGE||500)),language:l})});
+   if(d&&typeof d.reply==='string'&&(d.scheme===null||(d.scheme&&goodCat({schemes:[d.scheme],notice:'',disclaimer:'',documentsNote:'',helpline:{callLabel:'',note:'',tel:'tel:1'}}))))return d;
+  }catch(e){}
+ }
+ return SahelCatalog.chat(text.slice(0,(window.SahelCatalog?.MAX_MESSAGE||500)),l);
+}
+function botFromScheme(sc){
+ const m={t:sc.summary,title:sc.name,steps:sc.nextSteps.slice(),ex:true,note:true,topic:sc.id};
+ if(sc.exampleSchemes&&sc.exampleSchemes.length)m.schemes=sc.exampleSchemes.join(', ');
+ if(sc.documents.length){m.docs=sc.documents.slice();m.checked=sc.documents.map(()=>false)}
+ return m;
+}
+const botFromChat=d=>d.scheme?botFromScheme(d.scheme):{t:d.reply};
+
+function fullText(m,l){const u=T[l],c=ctx(m,l);let t=(m.title?m.title+'. ':'')+m.t+(m.schemes?' '+u.schLbl+' '+m.schemes+'.':'');if(m.steps)t+=' '+m.steps.map((s,i)=>(i+1)+'. '+s).join(' ');if(m.docs)t+=' '+u.docsTitle+'. '+m.docs.join('. ')+'. '+c.documentsNote;if(m.note)t+=' '+c.disclaimer;return t}
+function listText(m,l){const u=T[l],c=ctx(m,l);return(m.title?m.title+' – ':'')+u.docsTitle+'\n\n'+m.docs.map((d,j)=>(m.checked&&m.checked[j]?'✅ ':'⬜ ')+d).join('\n')+'\n\n'+c.documentsNote+'\n\n'+u.shareFrom}
+function fbCopy(t){const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(a);a.select();a.setSelectionRange(0,t.length);let ok=false;try{ok=document.execCommand('copy')}catch(e){}a.remove();return ok}
+function copyText(t){
+ if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(t).then(()=>true,()=>fbCopy(t));
+ return Promise.resolve(fbCopy(t));
+}
+
+const ICON={
+ chat:'<svg viewBox="0 0 52 52"><rect x="4" y="6" width="44" height="30" rx="12" fill="#F4B63F"/><path d="M14 36 L12 47 L26 36Z" fill="#F4B63F"/><circle cx="17" cy="21" r="3" fill="#12373A"/><circle cx="26" cy="21" r="3" fill="#12373A"/><circle cx="35" cy="21" r="3" fill="#12373A"/></svg>',
+ ear:'<svg viewBox="0 0 52 52"><path d="M8 20h10l12-10v32L18 32H8z" fill="#0F6B68"/><path d="M36 16q8 10 0 20M41 10q13 16 0 32" stroke="#C2185B" stroke-width="4" fill="none" stroke-linecap="round"/></svg>',
+ list:'<svg viewBox="0 0 52 52"><rect x="8" y="4" width="36" height="44" rx="8" fill="#C2185B"/><path d="M15 17l4 4 7-8M15 32l4 4 7-8" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M31 18h8M31 33h8" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg>',
+ face:'<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="58" fill="#F4B63F"/><path d="M18 74Q18 12 60 12Q102 12 102 74Q102 112 60 114Q18 112 18 74Z" fill="#C2185B"/><circle cx="60" cy="68" r="31" fill="#F6D2B0"/><path d="M29 60Q60 28 91 60Q60 44 29 60Z" fill="#12373A"/><circle cx="48" cy="68" r="3.5" fill="#12373A"/><circle cx="72" cy="68" r="3.5" fill="#12373A"/><path d="M48 82Q60 92 72 82" stroke="#12373A" stroke-width="3.5" fill="none" stroke-linecap="round"/><circle cx="60" cy="53" r="3.5" fill="#C2185B"/></svg>',
+ mic:'<svg viewBox="0 0 44 44" aria-hidden="true"><rect x="15" y="3" width="14" height="24" rx="7" fill="#fff"/><path d="M8 21q0 13 14 13t14-13M22 34v8" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>'
+};
+
+function fmt(d){const dt=new Date(d);return dt.toLocaleDateString(LC[lang],{day:'numeric',month:'short',year:'numeric'})+', '+dt.toLocaleTimeString(LC[lang],{hour:'2-digit',minute:'2-digit'})}
+function preview(c){const m=c.msgs.find(x=>x.r==='user')||c.msgs[c.msgs.length-1];const t=m?m.t:'';return t.length>60?t.slice(0,60)+'…':t}
+
+function msgEl(m,i,l){
+ const u=T[l],c=ctx(m,l);let h='<div class="msg '+m.r+'">';
+ if(m.ex||m.tp)h+='<div class="sample" style="margin:0 0 8px"><b>⚠ '+esc(c.notice)+'</b>'+(m.schemes?'<br>'+esc(u.schLbl)+' <b>'+esc(m.schemes)+'</b>':'')+'</div>';
+ if(m.title)h+='<h3>'+esc(m.title)+'</h3>';
+ h+=esc(m.t);
+ if(m.steps){if(m.docs)h+='<h4 class="sh">'+esc(u.stepsTitle)+'</h4>';h+='<ol>'+m.steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>'}
+ if(m.docs){
+  const ck=m.checked||[],n=m.docs.filter((d,j)=>ck[j]).length;
+  h+='<h4 class="sh">'+esc(u.docsTitle)+'</h4><p class="hint">'+esc(u.docsHint)+'</p><div class="chk-list" role="group" aria-label="'+esc(u.docsTitle)+'">'
+   +m.docs.map((d,j)=>{const on=!!ck[j];return '<button type="button" class="chk'+(on?' on':'')+'" role="checkbox" aria-checked="'+on+'" data-act="chk" data-i="'+i+'" data-j="'+j+'"><span class="box" aria-hidden="true">'+(on?'✔':'')+'</span><span>'+esc(d)+'</span></button>'}).join('')+'</div>'
+   +'<div class="count">'+esc(u.ready.replace('{n}',n).replace('{m}',m.docs.length))+'</div>'
+   +'<div class="sample">'+esc(c.documentsNote)+'</div>'
+   +'<div class="chips"><button type="button" data-act="copy" data-i="'+i+'">📋 '+esc(u.copy)+'</button><button type="button" data-act="wa" data-i="'+i+'">💬 '+esc(u.share)+'</button></div><div class="note cn" role="status"></div>';
+ }
+ if(m.note)h+='<div class="sample"><b>'+esc(u.sampleTag)+':</b> '+esc(c.disclaimer)+'</div>';
+ if((m.ex||m.tp)&&c.helpline)h+='<a class="callbtn" href="'+esc(c.helpline.tel)+'">📞 '+esc(c.helpline.callLabel)+'</a><p class="hint">'+esc(c.helpline.note)+'</p>';
+ if(m.r==='bot')h+='<br><button class="ls" data-act="listen" data-i="'+i+'" aria-label="'+esc(u.listen)+'">🔊 '+esc(u.listen)+'</button>';
+ return h+'</div>';
+}
+
+/* ---- Help-topic catalog (start screen) ---- */
+const TOPICS=['education','work','health','pension','ration','housing','farming','shg'];
+const TICON={
+ education:'<svg viewBox="0 0 52 52" aria-hidden="true"><path d="M26 14Q17 9 6 11V41Q17 39 26 44Q35 39 46 41V11Q35 9 26 14Z" fill="#F4B63F"/><path d="M26 14V44" stroke="#12373A" stroke-width="3"/><path d="M12 20h8M12 27h8M32 20h8M32 27h8" stroke="#12373A" stroke-width="3" stroke-linecap="round"/></svg>',
+ work:'<svg viewBox="0 0 52 52" aria-hidden="true"><path d="M19 16v-4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4" stroke="#0F6B68" stroke-width="4" fill="none"/><rect x="5" y="16" width="42" height="28" rx="6" fill="#0F6B68"/><rect x="5" y="26" width="42" height="4" fill="#F4B63F"/><rect x="22" y="24" width="8" height="8" rx="2" fill="#F4B63F" stroke="#12373A" stroke-width="2"/></svg>',
+ health:'<svg viewBox="0 0 52 52" aria-hidden="true"><path d="M26 46C6 32 5 14 16 11c5-1 9 2 10 6 1-4 5-7 10-6 11 3 10 21-10 35Z" fill="#C2185B"/><path d="M26 19v14M19 26h14" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>',
+ pension:'<svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="21" fill="#F4B63F" stroke="#12373A" stroke-width="3"/><path d="M17 16h18M17 23h18M20 16c9 0 11 9 2 10l9 10" stroke="#12373A" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ ration:'<svg viewBox="0 0 52 52" aria-hidden="true"><path d="M26 26V8M26 15l-7-5M26 15l7-5M26 22l-7-5M26 22l7-5" stroke="#F4B63F" stroke-width="3.5" stroke-linecap="round" fill="none"/><path d="M6 28h40c0 10-8 17-20 17S6 38 6 28Z" fill="#0F6B68"/><path d="M6 28h40" stroke="#F4B63F" stroke-width="3"/></svg>',
+ housing:'<svg viewBox="0 0 52 52" aria-hidden="true"><path d="M4 25L26 6l22 19" stroke="#C2185B" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="10" y="24" width="32" height="21" rx="3" fill="#F4B63F"/><rect x="21" y="32" width="10" height="13" rx="2" fill="#12373A"/></svg>',
+ farming:'<svg viewBox="0 0 52 52" aria-hidden="true"><path d="M26 46V24" stroke="#0F6B68" stroke-width="4" stroke-linecap="round"/><path d="M26 28C14 29 8 22 8 12c11 0 18 5 18 16Z" fill="#0F6B68"/><path d="M26 22c0-9 6-14 18-14 0 10-6 16-18 14Z" fill="#F4B63F"/><path d="M12 46h28" stroke="#0F6B68" stroke-width="4" stroke-linecap="round"/></svg>',
+ shg:'<svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="15" r="7" fill="#C2185B"/><path d="M14 41c0-9 5-14 12-14s12 5 12 14Z" fill="#C2185B"/><circle cx="10" cy="23" r="5.5" fill="#F4B63F"/><path d="M1 41c0-7 3-11 9-11 3 0 5 1 6 2-3 3-4 6-4 9Z" fill="#F4B63F"/><circle cx="42" cy="23" r="5.5" fill="#0F6B68"/><path d="M51 41c0-7-3-11-9-11-3 0-5 1-6 2 3 3 4 6 4 9Z" fill="#0F6B68"/></svg>'
+};
+/* Helplines: ONLY numbers confirmed on official Government of India pages (checked Oct 2026).
+   Education, Housing and Self-help groups have no confirmed number, so they show no call button. */
+const HL={
+ work:{num:'1800-425-1514',src:'ncs.gov.in',n:{en:'National Career Service · Tue–Sun, 8 am–8 pm',ta:'தேசிய தொழில் சேவை · செவ்வாய் முதல் ஞாயிறு, காலை 8 – இரவு 8',te:'జాతీయ కెరీర్ సర్వీస్ · మంగళ–ఆదివారం, ఉదయం 8 – రాత్రి 8',hi:'राष्ट्रीय कॅरियर सेवा · मंगल–रवि, सुबह 8 से रात 8'}},
+ health:{num:'14555',src:'nha.gov.in',n:{en:'Ayushman Bharat (PM-JAY) health insurance helpline',ta:'ஆயுஷ்மான் பாரத் (PM-JAY) காப்பீட்டு உதவி எண்',te:'ఆయుష్మాన్ భారత్ (PM-JAY) బీమా హెల్ప్‌లైన్',hi:'आयुष्मान भारत (पीएम-जेएवाई) स्वास्थ्य बीमा हेल्पलाइन'}},
+ pension:{num:'14567',src:'Ministry of Social Justice (PIB)',n:{en:'Elderline for senior citizens, including pension questions',ta:'எல்டர்லைன்: மூத்த குடிமக்களுக்கு; ஓய்வூதியக் கேள்விகளும்',te:'ఎల్డర్‌లైన్: సీనియర్ సిటిజన్లకు; పింఛన్ ప్రశ్నలకూ',hi:'एल्डरलाइन: वरिष्ठ नागरिकों के लिए, पेंशन के सवाल भी'}},
+ ration:{num:'1967',src:'dfpd.gov.in',n:{en:'Public distribution (ration) helpline',ta:'பொது விநியோக (ரேஷன்) உதவி எண்',te:'ప్రజా పంపిణీ (రేషన్) హెల్ప్‌లైన్',hi:'सार्वजनिक वितरण (राशन) हेल्पलाइन'}},
+ farming:{num:'1800-180-1551',src:'dackkms.gov.in',n:{en:'Kisan Call Centre · every day, 6 am–10 pm',ta:'கிசான் அழைப்பு மையம் · தினமும் காலை 6 – இரவு 10',te:'కిసాన్ కాల్ సెంటర్ · ప్రతిరోజూ ఉదయం 6 – రాత్రి 10',hi:'किसान कॉल सेंटर · रोज़ सुबह 6 से रात 10'}}
+};
+/* t[id] = [name, short description, summary, [next steps], [documents]] */
+const TX={
+en:{u:{title:'Choose a help topic',sub:'Tap a topic. I will show next steps and a document list.',own:'Or ask in your own words',call:'Call a helpline',notice:'Sample information only. Rules and amounts differ by state and can change. Please confirm at your local office.',disclaimer:'General sample guidance, not an official decision on whether you qualify.',docsNote:'Documents needed can differ by scheme and state. Ask the office.'},t:{
+education:['Education support','Scholarships, fees and help to keep studying.','Scholarships and fee support help students stay in school and college. Rules and amounts differ by scheme and state.',['Ask your school or college which scholarships apply.','Check last dates and income or category limits.','Apply online with help from the school or a Common Service Centre, and keep the application number.'],["Student's Aadhaar card","Bank passbook (student's account)",'Marks sheet or last result','Income certificate','Community certificate (if applicable)']],
+work:['Work and skills','Jobs, free skill training and rural work.','You can look for jobs, free skill training and rural wage work. A training certificate helps in finding work.',['Decide what work or training you want, such as tailoring or computer basics.','Register on the National Career Service portal or ask at the nearest employment office.','For rural wage work, ask your Gram Panchayat about a job card.'],['Aadhaar card','Bank passbook','Education certificates (if any)','Passport-size photos','Mobile number linked to Aadhaar']],
+health:['Health and maternity','Pregnancy, childbirth, child health and insurance.','Government hospitals give free check-ups in pregnancy and delivery. Some schemes give money support to mothers, and Ayushman Bharat can cover hospital costs.',['Register the pregnancy early at the nearest health centre or Anganwadi.','Go for all check-ups and keep the Mother and Child Protection card safe.','Plan delivery in a government hospital and ask about delivery support and an Ayushman Bharat card.'],['Aadhaar card','Bank passbook in your own name','Pregnancy registration slip or MCP card','Ration card or family proof','Mobile number linked to Aadhaar']],
+pension:['Pensions','Support for older people, widows and persons with disabilities.','Pension schemes give a monthly amount to older people, widows and persons with disabilities who meet the conditions.',['Find out which pension fits you: old age, widow or disability.','Ask your Gram Panchayat, ward or taluk office how to apply, and take a receipt.','Keep your bank account active so the pension can be paid.'],['Aadhaar card','Age proof (birth, school or voter ID)','Bank passbook',"Husband's death certificate (widow pension)",'Disability certificate (disability pension)']],
+ration:['Ration support','Ration card, subsidised grain and corrections.','A ration card lets your family buy subsidised food grain and also works as an ID. You can apply for a card or fix names and details.',['Check that your family has a ration card and the names are correct.','For a new card or changes, ask at the taluk supply office or your state civil supplies website.','If asked, complete Aadhaar linking or fingerprint (e-KYC) at the ration shop, and keep the receipt.'],['Aadhaar cards of all members','Address proof (electricity bill, rent agreement)','Passport-size photos','Birth or marriage certificate (to add a member)','Old ration card (for corrections)']],
+housing:['Housing','Help to build, buy or repair a house.','Housing schemes give financial help to families without a pucca house. Rural and urban schemes are separate, and rules differ by state.',['Find out if your area is rural (Gram Panchayat) or urban (municipality).','Ask the local office if your family is on the beneficiary list, and how to apply if not.','Keep proof of land or house site ready and save every receipt.'],['Aadhaar card','Bank passbook','Land document, patta or site proof','Ration card or income proof','Caste certificate (if applicable)']],
+farming:['Farming','Income support, crop insurance, loans and advice.','Farmers can get income support, crop insurance, low-interest loans and free advice. Registering with your land details is usually the first step.',['Check that your land record is in your name and up to date.','Register for PM-KISAN at the agriculture office or Common Service Centre and complete e-KYC.','Ask your bank about a Kisan Credit Card, and the agriculture office about crop insurance before sowing ends.'],['Aadhaar card','Land record (patta, chitta or similar)','Bank passbook','Mobile number linked to Aadhaar','Crop or sowing details (for insurance)']],
+shg:['Self-help groups and small business',"Join a women's group, get loans, start a business.",'Self-help groups let women save together, take low-interest loans and start small businesses with bank and livelihood-mission support.',['Join a group in your village or form one with 10 to 20 women.','Meet and save regularly, keep a record book and open a group bank account.','After some months, ask your bank or block office about group loans, or a MUDRA loan for your own business.'],['Aadhaar cards of all members','Passport-size photos','Savings and meeting record book','Group bank passbook','Simple business plan and amount needed']]}},
+hi:{u:{title:'सहायता का विषय चुनें',sub:'किसी विषय को दबाएँ। मैं अगले कदम और दस्तावेज़ों की सूची दिखाऊँगी।',own:'या अपने शब्दों में पूछें',call:'हेल्पलाइन पर कॉल करें',notice:'केवल नमूना जानकारी। नियम और राशि राज्य के अनुसार अलग होते हैं और बदल सकते हैं। कृपया स्थानीय कार्यालय में पुष्टि करें।',disclaimer:'यह सामान्य नमूना मार्गदर्शन है, पात्रता का आधिकारिक निर्णय नहीं।',docsNote:'ज़रूरी दस्तावेज़ योजना और राज्य के अनुसार अलग हो सकते हैं। कार्यालय से पूछें।'},t:{
+education:['शिक्षा सहायता','छात्रवृत्ति, फीस और पढ़ाई जारी रखने में मदद।','छात्रवृत्ति और फीस सहायता से विद्यार्थी स्कूल-कॉलेज में पढ़ाई जारी रख सकते हैं। नियम और राशि योजना व राज्य के अनुसार बदलते हैं।',['अपने स्कूल या कॉलेज से पूछें कि कौन-सी छात्रवृत्तियाँ लागू हैं।','अंतिम तारीख और आय या श्रेणी की सीमा देखें।','स्कूल या जन सेवा केंद्र की मदद से ऑनलाइन आवेदन करें और आवेदन संख्या रखें।'],['विद्यार्थी का आधार कार्ड','बैंक पासबुक (विद्यार्थी का खाता)','अंकतालिका या पिछला परिणाम','आय प्रमाण पत्र','जाति प्रमाण पत्र (यदि लागू हो)']],
+work:['काम और कौशल','रोज़गार, मुफ़्त कौशल प्रशिक्षण और ग्रामीण काम।','आप नौकरी, मुफ़्त कौशल प्रशिक्षण और ग्रामीण मज़दूरी वाला काम खोज सकते हैं। प्रशिक्षण का प्रमाण पत्र काम पाने में मदद करता है।',['तय करें कि कौन-सा काम या प्रशिक्षण चाहिए, जैसे सिलाई या कंप्यूटर की बुनियादी जानकारी।','राष्ट्रीय कॅरियर सेवा पोर्टल पर पंजीकरण करें या नज़दीकी रोज़गार कार्यालय में पूछें।','ग्रामीण मज़दूरी वाले काम के लिए ग्राम पंचायत से जॉब कार्ड के बारे में पूछें।'],['आधार कार्ड','बैंक पासबुक','शिक्षा के प्रमाण पत्र (यदि हों)','पासपोर्ट आकार की फ़ोटो','आधार से जुड़ा मोबाइल नंबर']],
+health:['स्वास्थ्य और मातृत्व','गर्भावस्था, प्रसव, बच्चे की देखभाल और बीमा।','सरकारी अस्पताल गर्भावस्था और प्रसव में मुफ़्त जाँच देते हैं। कुछ योजनाएँ माताओं को आर्थिक सहायता देती हैं, और आयुष्मान भारत अस्पताल का खर्च उठा सकता है।',['गर्भावस्था का पंजीकरण जल्दी नज़दीकी स्वास्थ्य केंद्र या आँगनवाड़ी में कराएँ।','सभी जाँच कराएँ और माँ-बच्चा सुरक्षा कार्ड सँभालकर रखें।','प्रसव सरकारी अस्पताल में कराएँ और प्रसव सहायता व आयुष्मान भारत कार्ड के बारे में पूछें।'],['आधार कार्ड','बैंक पासबुक (अपने नाम की)','गर्भावस्था पंजीकरण पर्ची या एमसीपी कार्ड','राशन कार्ड या परिवार का प्रमाण','आधार से जुड़ा मोबाइल नंबर']],
+pension:['पेंशन','बुज़ुर्गों, विधवाओं और दिव्यांगजनों के लिए सहायता।','पेंशन योजनाएँ शर्तें पूरी करने वाले बुज़ुर्गों, विधवाओं और दिव्यांगजनों को हर महीने राशि देती हैं।',['पता करें कि कौन-सी पेंशन आपके लिए है: वृद्धावस्था, विधवा या दिव्यांग।','ग्राम पंचायत, वार्ड या तहसील कार्यालय से आवेदन का तरीका पूछें और रसीद लें।','पेंशन जमा होने के लिए बैंक खाता चालू रखें।'],['आधार कार्ड','आयु प्रमाण (जन्म, स्कूल या मतदाता पहचान पत्र)','बैंक पासबुक','पति का मृत्यु प्रमाण पत्र (विधवा पेंशन)','विकलांगता प्रमाण पत्र (दिव्यांग पेंशन)']],
+ration:['राशन सहायता','राशन कार्ड, सस्ता अनाज और सुधार।','राशन कार्ड से परिवार सस्ता अनाज ले सकता है और यह पहचान पत्र भी है। आप कार्ड बनवा सकते हैं या नाम और विवरण सुधरवा सकते हैं।',['देखें कि परिवार का राशन कार्ड है और नाम सही हैं।','नए कार्ड या बदलाव के लिए तहसील आपूर्ति कार्यालय या राज्य की खाद्य आपूर्ति वेबसाइट देखें।','पूछे जाने पर राशन की दुकान पर आधार जोड़ें या फ़िंगरप्रिंट (ई-केवाईसी) कराएँ; रसीद रखें।'],['सभी सदस्यों के आधार कार्ड','पते का प्रमाण (बिजली बिल, किराया समझौता)','पासपोर्ट आकार की फ़ोटो','जन्म या विवाह प्रमाण पत्र (सदस्य जोड़ने के लिए)','पुराना राशन कार्ड (सुधार के लिए)']],
+housing:['आवास','घर बनाने, खरीदने या मरम्मत में मदद।','आवास योजनाएँ पक्का घर न रखने वाले परिवारों को आर्थिक मदद देती हैं। ग्रामीण और शहरी योजनाएँ अलग हैं और नियम राज्य के अनुसार बदलते हैं।',['देखें कि आपका क्षेत्र ग्रामीण (ग्राम पंचायत) है या शहरी (नगरपालिका)।','स्थानीय कार्यालय से पूछें कि परिवार लाभार्थी सूची में है या नहीं, और नहीं तो आवेदन कैसे करें।','ज़मीन या मकान की जगह का प्रमाण तैयार रखें और हर रसीद सँभालें।'],['आधार कार्ड','बैंक पासबुक','ज़मीन का दस्तावेज़, पट्टा या जगह का प्रमाण','राशन कार्ड या आय प्रमाण','जाति प्रमाण पत्र (यदि लागू हो)']],
+farming:['खेती','आय सहायता, फसल बीमा, ऋण और सलाह।','किसान आय सहायता, फसल बीमा, कम ब्याज के ऋण और मुफ़्त सलाह पा सकते हैं। आमतौर पर पहला कदम ज़मीन के विवरण के साथ पंजीकरण है।',['जाँचें कि ज़मीन का रिकॉर्ड आपके नाम पर और अद्यतन है।','कृषि कार्यालय या जन सेवा केंद्र पर पीएम-किसान के लिए पंजीकरण और ई-केवाईसी कराएँ।','बैंक से किसान क्रेडिट कार्ड और कृषि कार्यालय से बुवाई खत्म होने से पहले फसल बीमा के बारे में पूछें।'],['आधार कार्ड','ज़मीन का रिकॉर्ड (पट्टा, खतौनी या ऐसा ही)','बैंक पासबुक','आधार से जुड़ा मोबाइल नंबर','फसल या बुवाई का विवरण (बीमा के लिए)']],
+shg:['स्वयं सहायता समूह और छोटा व्यवसाय','महिला समूह, ऋण और छोटा व्यवसाय शुरू करना।','स्वयं सहायता समूह में महिलाएँ मिलकर बचत करती हैं, कम ब्याज पर ऋण लेती हैं और बैंक व आजीविका मिशन की मदद से छोटा व्यवसाय शुरू करती हैं।',['अपने गाँव के समूह से जुड़ें या 10 से 20 महिलाओं का नया समूह बनाएँ।','नियमित बैठक और बचत करें, रिकॉर्ड की किताब रखें और समूह का बैंक खाता खोलें।','कुछ महीनों बाद बैंक या ब्लॉक कार्यालय से समूह ऋण, या अपने व्यवसाय के लिए मुद्रा ऋण के बारे में पूछें।'],['सभी सदस्यों के आधार कार्ड','पासपोर्ट आकार की फ़ोटो','बचत और बैठक का रिकॉर्ड','समूह की बैंक पासबुक','व्यवसाय की सरल योजना और ज़रूरी राशि']]}},
+ta:{u:{title:'உதவித் தலைப்பைத் தேர்ந்தெடுங்கள்',sub:'ஒரு தலைப்பைத் தொடுங்கள். அடுத்த படிகளையும் ஆவணப் பட்டியலையும் காட்டுகிறேன்.',own:'அல்லது உங்கள் சொற்களில் கேளுங்கள்',call:'உதவி எண்ணை அழையுங்கள்',notice:'மாதிரித் தகவல் மட்டுமே. விதிகளும் தொகைகளும் மாநிலத்துக்கு ஏற்ப மாறும்; மாறவும் கூடும். உள்ளூர் அலுவலகத்தில் உறுதிசெய்யுங்கள்.',disclaimer:'இது பொதுவான மாதிரி வழிகாட்டல்; தகுதிக்கான அதிகாரப்பூர்வ முடிவு அல்ல.',docsNote:'தேவையான ஆவணங்கள் திட்டத்துக்கும் மாநிலத்துக்கும் ஏற்ப மாறலாம். அலுவலகத்தில் கேளுங்கள்.'},t:{
+education:['கல்வி உதவி','உதவித்தொகை, கட்டணம், படிப்பைத் தொடர உதவி.','உதவித்தொகையும் கட்டண உதவியும் மாணவர்கள் பள்ளி, கல்லூரியில் படிப்பைத் தொடர உதவும். விதிகளும் தொகையும் திட்டத்துக்கும் மாநிலத்துக்கும் ஏற்ப மாறும்.',['எந்த உதவித்தொகைகள் பொருந்தும் என்று பள்ளி அல்லது கல்லூரியில் கேளுங்கள்.','கடைசித் தேதி, வருமான அல்லது பிரிவு வரம்புகளைப் பாருங்கள்.','பள்ளி அல்லது பொது சேவை மையத்தின் உதவியுடன் இணையத்தில் விண்ணப்பித்து, விண்ணப்ப எண்ணை வைத்துக்கொள்ளுங்கள்.'],['மாணவரின் ஆதார் அட்டை','வங்கிப் புத்தகம் (மாணவரின் கணக்கு)','மதிப்பெண் பட்டியல் அல்லது கடந்த ஆண்டு முடிவு','வருமானச் சான்றிதழ்','சாதிச் சான்றிதழ் (பொருந்தினால்)']],
+work:['வேலை மற்றும் திறன்','வேலைவாய்ப்பு, இலவசப் பயிற்சி, கிராமப்புற வேலை.','வேலை, இலவசத் திறன் பயிற்சி, கிராமப்புறக் கூலி வேலை ஆகியவற்றைத் தேடலாம். பயிற்சிச் சான்றிதழ் வேலை கிடைக்க உதவும்.',['எந்த வேலை அல்லது பயிற்சி வேண்டும் என்று முடிவுசெய்யுங்கள்; எ.கா. தையல், கணினி அடிப்படைகள்.','தேசிய தொழில் சேவை இணையதளத்தில் பதிவுசெய்யுங்கள், அல்லது அருகிலுள்ள வேலைவாய்ப்பு அலுவலகத்தில் கேளுங்கள்.','கிராமப்புறக் கூலி வேலைக்கு வேலை அட்டை பற்றி கிராம ஊராட்சியில் கேளுங்கள்.'],['ஆதார் அட்டை','வங்கிப் புத்தகம்','கல்விச் சான்றிதழ்கள் (இருந்தால்)','பாஸ்போர்ட் அளவு புகைப்படங்கள்','ஆதாருடன் இணைந்த கைபேசி எண்']],
+health:['உடல்நலம் மற்றும் மகப்பேறு','கர்ப்பம், பிரசவம், குழந்தை நலம், காப்பீடு.','அரசு மருத்துவமனைகள் கர்ப்பகாலத்திலும் பிரசவத்திலும் இலவசப் பரிசோதனை தருகின்றன. சில திட்டங்கள் தாய்மார்களுக்குப் பண உதவி தருகின்றன; ஆயுஷ்மான் பாரத் மருத்துவமனைச் செலவை ஏற்கலாம்.',['கர்ப்பத்தை முன்கூட்டியே அருகிலுள்ள சுகாதார நிலையம் அல்லது அங்கன்வாடியில் பதிவுசெய்யுங்கள்.','எல்லாப் பரிசோதனைகளுக்கும் செல்லுங்கள்; தாய்–சேய் பாதுகாப்பு அட்டையைப் பத்திரமாக வையுங்கள்.','அரசு மருத்துவமனையில் பிரசவத்துக்குத் திட்டமிட்டு, பிரசவ உதவி மற்றும் ஆயுஷ்மான் பாரத் அட்டை பற்றிக் கேளுங்கள்.'],['ஆதார் அட்டை','வங்கிப் புத்தகம் (உங்கள் பெயரில்)','கர்ப்பப் பதிவுச் சீட்டு அல்லது MCP அட்டை','குடும்ப அட்டை அல்லது குடும்பச் சான்று','ஆதாருடன் இணைந்த கைபேசி எண்']],
+pension:['ஓய்வூதியம்','முதியோர், விதவைகள், மாற்றுத்திறனாளிகளுக்கு உதவி.','நிபந்தனைகளைப் பூர்த்தி செய்யும் முதியோர், விதவைகள், மாற்றுத்திறனாளிகளுக்கு ஓய்வூதியத் திட்டங்கள் மாதந்தோறும் தொகை வழங்குகின்றன.',['முதியோர், விதவை, மாற்றுத்திறனாளி என எந்த ஓய்வூதியம் பொருந்தும் என்று அறியுங்கள்.','கிராம ஊராட்சி, வார்டு அல்லது வட்ட அலுவலகத்தில் விண்ணப்ப முறையைக் கேட்டு, ரசீது பெறுங்கள்.','ஓய்வூதியம் செலுத்த வங்கிக் கணக்கைச் செயலில் வைத்திருங்கள்.'],['ஆதார் அட்டை','வயதுச் சான்று (பிறப்பு, பள்ளி அல்லது வாக்காளர் அட்டை)','வங்கிப் புத்தகம்','கணவரின் இறப்புச் சான்றிதழ் (விதவை ஓய்வூதியம்)','மாற்றுத்திறனாளிச் சான்றிதழ் (மாற்றுத்திறனாளி ஓய்வூதியம்)']],
+ration:['ரேஷன் உதவி','குடும்ப அட்டை, மானிய உணவுப் பொருள், திருத்தம்.','குடும்ப அட்டை மூலம் மானிய விலையில் உணவுப் பொருள் வாங்கலாம்; அது அடையாள அட்டையாகவும் பயன்படும். புதிய அட்டைக்கு விண்ணப்பிக்கலாம்; பெயர், விவரங்களைத் திருத்தலாம்.',['குடும்ப அட்டை உள்ளதா, பெயர்கள் சரியா என்று பாருங்கள்.','புதிய அட்டை அல்லது மாற்றத்துக்கு வட்ட வழங்கல் அலுவலகம் அல்லது மாநில உணவு வழங்கல் இணையதளத்தைப் பாருங்கள்.','கேட்டால், ரேஷன் கடையில் ஆதார் இணைப்பு அல்லது கைரேகைச் சரிபார்ப்பை (e-KYC) முடித்து, ரசீதை வைத்துக்கொள்ளுங்கள்.'],['எல்லா உறுப்பினர்களின் ஆதார் அட்டைகள்','முகவரிச் சான்று (மின்கட்டண ரசீது, வாடகை ஒப்பந்தம்)','பாஸ்போர்ட் அளவு புகைப்படங்கள்','பிறப்பு அல்லது திருமணச் சான்றிதழ் (உறுப்பினரைச் சேர்க்க)','பழைய குடும்ப அட்டை (திருத்தத்துக்கு)']],
+housing:['வீட்டுவசதி','வீடு கட்ட, வாங்க, பழுதுபார்க்க உதவி.','நிரந்தர (பக்கா) வீடு இல்லாத குடும்பங்களுக்கு வீட்டுவசதித் திட்டங்கள் நிதி உதவி தருகின்றன. கிராமப்புறத்துக்கும் நகர்ப்புறத்துக்கும் தனித் திட்டங்கள்; விதிகள் மாநிலத்துக்கு ஏற்ப மாறும்.',['உங்கள் பகுதி கிராமப்புறமா (ஊராட்சி) நகர்ப்புறமா (நகராட்சி) என்று பாருங்கள்.','உங்கள் குடும்பம் பயனாளிகள் பட்டியலில் உள்ளதா, இல்லையெனில் எப்படி விண்ணப்பிப்பது என்று உள்ளூர் அலுவலகத்தில் கேளுங்கள்.','நிலம் அல்லது வீட்டுமனைச் சான்றைத் தயாராக வைத்து, ஒவ்வொரு ரசீதையும் பத்திரப்படுத்துங்கள்.'],['ஆதார் அட்டை','வங்கிப் புத்தகம்','நில ஆவணம், பட்டா அல்லது மனைச் சான்று','குடும்ப அட்டை அல்லது வருமானச் சான்று','சாதிச் சான்றிதழ் (பொருந்தினால்)']],
+farming:['விவசாயம்','வருமான உதவி, பயிர்க் காப்பீடு, கடன், ஆலோசனை.','விவசாயிகள் வருமான உதவி, பயிர்க் காப்பீடு, குறைந்த வட்டிக் கடன், இலவச ஆலோசனை பெறலாம். பொதுவாக முதல் படி, நில விவரங்களுடன் பதிவுசெய்வது.',['உங்கள் நிலப் பதிவேடு உங்கள் பெயரில் புதுப்பிக்கப்பட்டுள்ளதா என்று பாருங்கள்.','வேளாண்மை அலுவலகம் அல்லது பொது சேவை மையத்தில் பிஎம்-கிசானுக்குப் பதிவுசெய்து e-KYC முடியுங்கள்.','வங்கியில் கிசான் கிரெடிட் கார்டு பற்றியும், விதைப்பு முடியும் முன் வேளாண்மை அலுவலகத்தில் பயிர்க் காப்பீடு பற்றியும் கேளுங்கள்.'],['ஆதார் அட்டை','நிலப் பதிவேடு (பட்டா, சிட்டா போன்றவை)','வங்கிப் புத்தகம்','ஆதாருடன் இணைந்த கைபேசி எண்','பயிர் அல்லது விதைப்பு விவரம் (காப்பீட்டுக்கு)']],
+shg:['சுய உதவிக் குழுக்கள் மற்றும் சிறு தொழில்','மகளிர் குழு, கடன், சிறு தொழில் தொடக்கம்.','சுய உதவிக் குழுவில் பெண்கள் சேர்ந்து சேமிக்கலாம், குறைந்த வட்டிக்குக் கடன் பெறலாம், வங்கி மற்றும் வாழ்வாதார இயக்க உதவியுடன் சிறு தொழில் தொடங்கலாம்.',['உங்கள் ஊரில் உள்ள குழுவில் சேருங்கள், அல்லது 10 முதல் 20 பெண்களுடன் புதிய குழுவைத் தொடங்குங்கள்.','தவறாமல் கூடிச் சேமியுங்கள், பதிவேடு வையுங்கள், குழுவுக்கு வங்கிக் கணக்கு தொடங்குங்கள்.','சில மாதங்களுக்குப் பின், குழுக் கடன் அல்லது சொந்தத் தொழிலுக்கான முத்ரா கடன் பற்றி வங்கி அல்லது வட்டார அலுவலகத்தில் கேளுங்கள்.'],['எல்லா உறுப்பினர்களின் ஆதார் அட்டைகள்','பாஸ்போர்ட் அளவு புகைப்படங்கள்','சேமிப்பு, கூட்டப் பதிவேடு','குழு வங்கிப் புத்தகம்','எளிய தொழில் திட்டமும் தேவையான தொகையும்']]}},
+te:{u:{title:'సహాయ అంశాన్ని ఎంచుకోండి',sub:'ఒక అంశాన్ని నొక్కండి. తదుపరి అడుగులు, పత్రాల జాబితా చూపిస్తాను.',own:'లేదా మీ మాటల్లో అడగండి',call:'హెల్ప్‌లైన్‌కు కాల్ చేయండి',notice:'నమూనా సమాచారం మాత్రమే. నియమాలు, మొత్తాలు రాష్ట్రాన్ని బట్టి మారతాయి, మారవచ్చు కూడా. స్థానిక కార్యాలయంలో నిర్ధారించుకోండి.',disclaimer:'ఇది సాధారణ నమూనా మార్గదర్శకం; అర్హతపై అధికారిక నిర్ణయం కాదు.',docsNote:'అవసరమైన పత్రాలు పథకాన్ని, రాష్ట్రాన్ని బట్టి మారవచ్చు. కార్యాలయంలో అడగండి.'},t:{
+education:['విద్యా సహాయం','స్కాలర్‌షిప్‌లు, ఫీజులు, చదువుకు సహాయం.','స్కాలర్‌షిప్‌లు, ఫీజు సహాయం విద్యార్థులు స్కూల్, కాలేజీలో చదువు కొనసాగించడానికి తోడ్పడతాయి. నియమాలు, మొత్తాలు పథకాన్ని, రాష్ట్రాన్ని బట్టి మారతాయి.',['ఏ స్కాలర్‌షిప్‌లు వర్తిస్తాయో మీ స్కూల్ లేదా కాలేజీలో అడగండి.','చివరి తేదీ, ఆదాయం లేదా వర్గం పరిమితులు చూడండి.','స్కూల్ లేదా కామన్ సర్వీస్ సెంటర్ సహాయంతో ఆన్‌లైన్‌లో దరఖాస్తు చేసి, దరఖాస్తు నంబరు ఉంచుకోండి.'],['విద్యార్థి ఆధార్ కార్డు','బ్యాంకు పాస్‌బుక్ (విద్యార్థి ఖాతా)','మార్కుల పత్రం లేదా గత ఫలితం','ఆదాయ ధృవీకరణ పత్రం','కుల ధృవీకరణ పత్రం (వర్తిస్తే)']],
+work:['ఉపాధి మరియు నైపుణ్యాలు','ఉద్యోగాలు, ఉచిత శిక్షణ, గ్రామీణ పని.','ఉద్యోగాలు, ఉచిత నైపుణ్య శిక్షణ, గ్రామీణ కూలీ పని కోసం వెతకవచ్చు. శిక్షణ సర్టిఫికెట్ పని దొరకడానికి సహాయపడుతుంది.',['ఏ పని లేదా శిక్షణ కావాలో నిర్ణయించుకోండి, ఉదా. కుట్టుపని, కంప్యూటర్ ప్రాథమికాలు.','జాతీయ కెరీర్ సర్వీస్ పోర్టల్‌లో నమోదు చేసుకోండి, లేదా సమీప ఉపాధి కార్యాలయంలో అడగండి.','గ్రామీణ కూలీ పని కోసం జాబ్ కార్డు గురించి గ్రామ పంచాయతీలో అడగండి.'],['ఆధార్ కార్డు','బ్యాంకు పాస్‌బుక్','విద్యా ధృవపత్రాలు (ఉంటే)','పాస్‌పోర్ట్ సైజు ఫోటోలు','ఆధార్‌కు లింక్ అయిన మొబైల్ నంబరు']],
+health:['ఆరోగ్యం మరియు ప్రసూతి','గర్భం, ప్రసవం, పిల్లల ఆరోగ్యం, బీమా.','ప్రభుత్వ ఆసుపత్రులు గర్భధారణలో, ప్రసవంలో ఉచిత పరీక్షలు ఇస్తాయి. కొన్ని పథకాలు తల్లులకు ఆర్థిక సహాయం ఇస్తాయి; ఆయుష్మాన్ భారత్ ఆసుపత్రి ఖర్చును భరించవచ్చు.',['గర్భాన్ని ముందుగానే సమీప ఆరోగ్య కేంద్రంలో లేదా అంగన్‌వాడీలో నమోదు చేయించండి.','అన్ని పరీక్షలకు వెళ్లండి; తల్లి–బిడ్డ రక్షణ కార్డును భద్రంగా ఉంచండి.','ప్రభుత్వ ఆసుపత్రిలో ప్రసవానికి ప్లాన్ చేసి, ప్రసవ సహాయం, ఆయుష్మాన్ భారత్ కార్డు గురించి అడగండి.'],['ఆధార్ కార్డు','బ్యాంకు పాస్‌బుక్ (మీ పేరు మీద)','గర్భ నమోదు స్లిప్ లేదా MCP కార్డు','రేషన్ కార్డు లేదా కుటుంబ రుజువు','ఆధార్‌కు లింక్ అయిన మొబైల్ నంబరు']],
+pension:['పింఛన్లు','వృద్ధులు, వితంతువులు, దివ్యాంగులకు సహాయం.','షరతులు తీర్చే వృద్ధులు, వితంతువులు, దివ్యాంగులకు పింఛన్ పథకాలు ప్రతి నెలా నిర్ణీత మొత్తం ఇస్తాయి.',['వృద్ధాప్య, వితంతు, దివ్యాంగ పింఛన్లలో మీకు ఏది సరిపోతుందో తెలుసుకోండి.','గ్రామ పంచాయతీ, వార్డు లేదా తహశీల్దార్ కార్యాలయంలో దరఖాస్తు విధానం అడిగి, రసీదు తీసుకోండి.','పింఛన్ జమ కావడానికి బ్యాంకు ఖాతాను పనిచేసేలా ఉంచండి.'],['ఆధార్ కార్డు','వయసు రుజువు (జనన, స్కూల్ సర్టిఫికెట్ లేదా ఓటరు కార్డు)','బ్యాంకు పాస్‌బుక్','భర్త మరణ ధృవీకరణ పత్రం (వితంతు పింఛన్)','దివ్యాంగ ధృవీకరణ పత్రం (దివ్యాంగ పింఛన్)']],
+ration:['రేషన్ సహాయం','రేషన్ కార్డు, సబ్సిడీ ధాన్యం, సవరణలు.','రేషన్ కార్డుతో కుటుంబం సబ్సిడీ ధరకు ధాన్యాలు పొందవచ్చు; ఇది గుర్తింపు కార్డుగా కూడా పనిచేస్తుంది. కొత్త కార్డుకు దరఖాస్తు చేయవచ్చు, పేర్లు, వివరాలు సరిచేయించవచ్చు.',['కుటుంబానికి రేషన్ కార్డు ఉందో, పేర్లు సరిగా ఉన్నాయో చూడండి.','కొత్త కార్డు లేదా మార్పుల కోసం తహశీల్దార్ సరఫరా కార్యాలయం లేదా రాష్ట్ర పౌర సరఫరాల వెబ్‌సైట్ చూడండి.','అడిగితే రేషన్ దుకాణంలో ఆధార్ లింకింగ్ లేదా వేలిముద్ర (e-KYC) పూర్తి చేసి, రసీదు ఉంచుకోండి.'],['సభ్యులందరి ఆధార్ కార్డులు','చిరునామా రుజువు (కరెంటు బిల్లు, అద్దె ఒప్పందం)','పాస్‌పోర్ట్ సైజు ఫోటోలు','జనన లేదా వివాహ ధృవీకరణ పత్రం (సభ్యుడిని చేర్చడానికి)','పాత రేషన్ కార్డు (సవరణ కోసం)']],
+housing:['గృహ నిర్మాణం','ఇల్లు కట్టుకోవడానికి, కొనడానికి, మరమ్మతుకు సహాయం.','పక్కా ఇల్లు లేని కుటుంబాలకు గృహ పథకాలు ఆర్థిక సహాయం ఇస్తాయి. గ్రామీణ, పట్టణ పథకాలు వేరు; నియమాలు రాష్ట్రాన్ని బట్టి మారతాయి.',['మీ ప్రాంతం గ్రామీణమా (గ్రామ పంచాయతీ) పట్టణమా (మున్సిపాలిటీ) చూడండి.','మీ కుటుంబం లబ్ధిదారుల జాబితాలో ఉందో, లేకపోతే ఎలా దరఖాస్తు చేయాలో స్థానిక కార్యాలయంలో అడగండి.','భూమి లేదా ఇంటి స్థలం రుజువు సిద్ధంగా ఉంచి, ప్రతి రసీదు భద్రపరచండి.'],['ఆధార్ కార్డు','బ్యాంకు పాస్‌బుక్','భూమి పత్రం, పట్టా లేదా స్థలం రుజువు','రేషన్ కార్డు లేదా ఆదాయ రుజువు','కుల ధృవీకరణ పత్రం (వర్తిస్తే)']],
+farming:['వ్యవసాయం','ఆదాయ సహాయం, పంటల బీమా, రుణాలు, సలహా.','రైతులు ఆదాయ సహాయం, పంటల బీమా, తక్కువ వడ్డీ రుణాలు, ఉచిత సలహా పొందవచ్చు. సాధారణంగా మొదటి అడుగు భూమి వివరాలతో నమోదు చేసుకోవడం.',['భూమి రికార్డు మీ పేరు మీద, తాజాగా ఉందో చూడండి.','వ్యవసాయ కార్యాలయం లేదా కామన్ సర్వీస్ సెంటర్‌లో పీఎం-కిసాన్ కోసం నమోదు చేసుకుని e-KYC పూర్తి చేయండి.','బ్యాంకులో కిసాన్ క్రెడిట్ కార్డు గురించి, విత్తనాలు వేసే కాలం ముగిసేలోపు వ్యవసాయ కార్యాలయంలో పంటల బీమా గురించి అడగండి.'],['ఆధార్ కార్డు','భూమి రికార్డు (పట్టా, పాస్‌బుక్ వంటివి)','బ్యాంకు పాస్‌బుక్','ఆధార్‌కు లింక్ అయిన మొబైల్ నంబరు','పంట లేదా విత్తన వివరాలు (బీమా కోసం)']],
+shg:['స్వయం సహాయక సంఘాలు మరియు చిన్న వ్యాపారం','మహిళా సంఘం, రుణాలు, చిన్న వ్యాపారం.','స్వయం సహాయక సంఘంలో మహిళలు కలిసి పొదుపు చేసి, తక్కువ వడ్డీకి రుణం తీసుకుని, బ్యాంకు, జీవనోపాధి మిషన్ సహాయంతో చిన్న వ్యాపారం మొదలుపెట్టవచ్చు.',['మీ గ్రామంలోని సంఘంలో చేరండి, లేదా 10 నుంచి 20 మంది మహిళలతో కొత్త సంఘం ఏర్పాటు చేయండి.','క్రమం తప్పక సమావేశమై పొదుపు చేయండి, రికార్డు పుస్తకం ఉంచండి, సంఘం బ్యాంకు ఖాతా తెరవండి.','కొన్ని నెలల తర్వాత సంఘ రుణం లేదా సొంత వ్యాపారానికి ముద్ర రుణం గురించి బ్యాంకు లేదా మండల కార్యాలయంలో అడగండి.'],['సభ్యులందరి ఆధార్ కార్డులు','పాస్‌పోర్ట్ సైజు ఫోటోలు','పొదుపు, సమావేశాల రికార్డు','సంఘం బ్యాంకు పాస్‌బుక్','సులభమైన వ్యాపార ప్రణాళిక, అవసరమైన మొత్తం']]}}
+};
+function topicHL(id,l){const h=HL[id];return h?{tel:'tel:'+h.num.replace(/\D/g,''),callLabel:TX[l].u.call+': '+h.num,note:h.n[l]||h.n.en}:null}
+function ctx(m,l){if(m&&m.tp&&TX[l]){const u=TX[l].u;return{notice:u.notice,disclaimer:u.disclaimer,documentsNote:u.docsNote,helpline:topicHL(m.tp,l)}}return catFor(l)}
+function topicMsg(id,l){const k=TX[l].t[id];return{t:k[2],title:k[0],steps:k[3].slice(),docs:k[4].slice(),checked:k[4].map(()=>false),note:true,tp:id,topic:id}}
+
+/* ---- Embedded fallback catalog (self-contained, no external file; built from the TX/HL data above) ---- */
+window.SahelCatalog=window.SahelCatalog||(()=>{
+ const MAX_MESSAGE=500;
+ const KEYS={
+  education:['scholarship','school','college','student','fees','education','padhai','shiksha','படி','கல்வி','உதவித்தொகை','విద్య','స్కాలర్','చదువ','शिक्षा','छात्रवृत्ति','पढ़ाई','पढाई'],
+  work:['job','work','skill','training','employment','nrega','mgnrega','रोज़गार','रोजगार','नौकरी','काम','कौशल','வேலை','பயிற்சி','திறன்','ఉద్యోగ','ఉపాధి','పని','శిక్షణ'],
+  health:['health','pregnan','maternity','delivery','hospital','ayushman','insurance','स्वास्थ्य','गर्भ','प्रसव','अस्पताल','आयुष्मान','உடல்நல','கர்ப்ப','பிரசவ','மருத்துவ','ఆరోగ్య','గర్భ','ప్రసవ','ఆసుపత్రి'],
+  pension:['pension','old age','widow','disab','senior','पेंशन','विधवा','दिव्यांग','बुज़ुर्ग','ஓய்வூதிய','முதியோர்','விதவை','పింఛన్','వితంతు','వృద్ధ','దివ్యాంగ'],
+  ration:['ration','food grain','ration card','राशन','अनाज','ரேஷன்','குடும்ப அட்டை','రేషన్','ధాన్యం'],
+  housing:['house','housing','home','awas','pmay','आवास','घर','मकान','வீடு','வீட்டு','ఇల్లు','గృహ'],
+  farming:['farm','kisan','crop','agricultur','pm-kisan','खेती','किसान','फसल','விவசாய','பயிர்','கிசான்','వ్యవసాయ','రైతు','పంట'],
+  shg:['self help','self-help','shg','mudra','women group','business','स्वयं सहायता','समूह','व्यवसाय','मुद्रा','சுய உதவி','மகளிர்','தொழில்','ముద్ర','స్వయం సహాయ','వ్యాపార']
+ };
+ const RETRY={en:'Sorry, something went wrong. Please try again.',hi:'क्षमा करें, कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।',ta:'மன்னிக்கவும், ஏதோ தவறு நடந்துவிட்டது. மீண்டும் முயலுங்கள்.',te:'క్షమించండి, ఏదో పొరపాటు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.'};
+ const NOMATCH={en:'I could not find a matching topic. Please tap one of the topics below, or ask again with words like pension, ration, health, farming or scholarship.',hi:'मुझे मेल खाता विषय नहीं मिला। कृपया नीचे से कोई विषय चुनें, या पेंशन, राशन, स्वास्थ्य, खेती या छात्रवृत्ति जैसे शब्दों में फिर पूछें।',ta:'பொருந்தும் தலைப்பு கிடைக்கவில்லை. கீழே உள்ள ஒரு தலைப்பைத் தொடுங்கள், அல்லது ஓய்வூதியம், ரேஷன், உடல்நலம், விவசாயம், உதவித்தொகை போன்ற சொற்களில் மீண்டும் கேளுங்கள்.',te:'సరిపోయే అంశం దొరకలేదు. దయచేసి కింది అంశాల్లో ఒకటి నొక్కండి, లేదా పింఛన్, రేషన్, ఆరోగ్యం, వ్యవసాయం, స్కాలర్‌షిప్ వంటి పదాలతో మళ్లీ అడగండి.'};
+ const lg=l=>TX[l]?l:'en';
+ function schemesFor(l){
+  l=lg(l);
+  return TOPICS.map(id=>{const k=TX[l].t[id];return{id,name:k[0],summary:k[2],nextSteps:k[3].slice(),documents:k[4].slice()}});
+ }
+ function getCatalog(l){
+  l=lg(l);const u=TX[l].u;
+  const hl=HL.work;  // generic fallback helpline: National Career Service toll-free
+  return{schemes:schemesFor(l),notice:u.notice,disclaimer:u.disclaimer,documentsNote:u.docsNote,retry:RETRY[l],
+   helpline:{callLabel:u.call+': '+hl.num,note:hl.n[l]||hl.n.en,tel:'tel:'+hl.num}};
+ }
+ function chat(text,l){
+  l=lg(l);const q=String(text||'').toLowerCase();
+  let best=null,bs=0;
+  TOPICS.forEach(id=>{let s=0;KEYS[id].forEach(k=>{if(q.indexOf(k.toLowerCase())>=0)s+=k.length});if(s>bs){bs=s;best=id}});
+  if(!best)return{reply:NOMATCH[l],scheme:null};
+  const sc=schemesFor(l).find(x=>x.id===best);
+  return{reply:sc.summary,scheme:sc};
+ }
+ return{MAX_MESSAGE,getCatalog,chat};
+})();
+function topics(){
+ const u=ui(),x=TX[lang];
+ let h='<div class="top"><button data-act="home">⬅ '+esc(u.home)+'</button><b>Scheme Saheli · '+NAMES[lang]+'</b></div>';
+ h+='<div class="langs" role="group" aria-label="Language">'+['ta','te','en','hi'].map(l=>'<button data-act="lang" data-v="'+l+'" aria-pressed="'+(l===lang)+'">'+NAMES[l]+'</button>').join('')+'</div>';
+ h+='<h2 id="topH" tabindex="-1">'+esc(x.u.title)+'</h2><p class="tintro">'+esc(x.u.sub)+'</p><div class="tgrid">';
+ TOPICS.forEach(id=>{const k=x.t[id];h+='<button type="button" class="tcard" data-act="topic" data-id="'+id+'">'+TICON[id]+'<span class="tx"><b>'+esc(k[0])+'</b><span>'+esc(k[1])+'</span></span></button>'});
+ return h+'</div><button type="button" style="width:100%" data-act="ownq">💬 '+esc(x.u.own)+'</button>';
+}
+function pickTopic(id){
+ const inChat=view==='chat'&&cur&&cur.step==='topic',l=inChat?cur.lang:lang;
+ if(!TX[l]||!TX[l].t[id])return;
+ const conv=inChat?cur:{id:uid(),lang:l,date:new Date().toISOString(),voice:false,step:'topic',topic:null,msgs:[],stored:false};
+ if(pending.has(conv))return;
+ const bot=topicMsg(id,l);
+ conv.msgs.push({r:'user',t:TX[l].t[id][0]},Object.assign({r:'bot'},bot));
+ conv.topic=id;conv.step='done';
+ if(!conv.stored){convs.unshift(conv);conv.stored=true}
+ persist();cur=conv;go('chat');
+ const us=document.querySelectorAll('.msg.user'),last=us[us.length-1];if(last)last.scrollIntoView({block:'start'});
+ speak(fullText(bot,l),l);
+}
+function askOwn(){
+ loadCat(lang);
+ cur={id:uid(),lang,date:new Date().toISOString(),voice:false,step:'topic',topic:null,msgs:[{r:'bot',t:ui().greet}],stored:false};
+ go('chat');speak(cur.msgs[0].t,cur.lang);
+}
+
+function home(){
+ const u=ui();
+ let h='<div class="brand">'+ICON.face+'<div><h1>Scheme Saheli</h1><p>'+esc(u.tagline)+'</p></div></div>';
+ h+='<div class="langs" role="group" aria-label="Language">'+['ta','te','en','hi'].map(l=>'<button data-act="lang" data-v="'+l+'" aria-pressed="'+(l===lang)+'">'+NAMES[l]+'</button>').join('')+'</div>';
+ h+='<button style="width:100%;margin:-8px 0 8px" data-act="test">🔊 '+esc(u.testVoice)+' ('+NAMES[lang]+')</button>';
+ h+='<button style="width:100%;margin:0 0 8px" data-act="settings">⚙ '+esc(u.set)+' · '+esc(u.tut)+'</button>';
+ h+='<div class="note" id="tts" role="status">'+esc(ttsWarn)+'</div>';
+ h+='<button class="big" data-act="start">'+esc(u.start)+'</button>';
+ h+='<h2>'+esc(u.how)+'</h2><div class="how">'+[['chat',u.h1],['ear',u.h2],['list',u.h3]].map((x,i)=>'<div class="card">'+ICON[x[0]]+'<b>'+(i+1)+'. '+esc(x[1])+'</b></div>').join('')+'</div>';
+ h+='<h2 id="prevH" tabindex="-1" style="margin-top:28px">'+esc(u.prev)+'</h2>';
+ if(!convs.length)h+='<div class="card">'+esc(u.none)+'</div>';
+ convs.forEach(c=>{h+='<div class="row card" style="padding:8px"><button class="open" data-act="open" data-id="'+esc(c.id)+'"><small>'+esc(fmt(c.date))+' · '+NAMES[c.lang]+(c.voice?' · 🎤 '+esc(u.voiceUsed):'')+'</small>'+esc(preview(c))+'</button><button type="button" class="del" data-act="del" data-id="'+esc(c.id)+'" aria-label="'+esc(u.del+': '+fmt(c.date)+', '+preview(c))+'">🗑 '+esc(u.del)+'</button></div>'});
+ return h;
+}
+
+function chat(){
+ const l=cur.lang,u=T[l];
+ let h='<div class="top"><button data-act="home">⬅ '+esc(u.home)+'</button><b>Scheme Saheli · '+NAMES[l]+'</b></div>';
+ h+='<div class="log" aria-live="polite">'+cur.msgs.map((m,i)=>msgEl(m,i,l)).join('')+'</div>';
+ h+='<div class="note" id="tts" role="status">'+esc(ttsWarn)+'</div>';
+ if(pending.has(cur))h+='<div class="note" role="status">'+esc(u.thinking)+'</div>';
+ if(cur.step==='topic'){
+  h+='<p><b>'+esc(u.topics)+'</b></p><div class="chips">'+TOPICS.map(id=>'<button type="button" data-act="topic" data-id="'+id+'">'+esc(TX[l].t[id][0])+'</button>').join('')+'</div>';
+ }else{
+  h+='<p class="saved">'+esc(u.saved)+'</p><button class="big" style="margin-bottom:8px" data-act="start">'+esc(u.newchat)+'</button>';
+ }
+ if(cur.step!=='done'){
+  h+='<div class="micwrap"><button class="mic" id="mic" data-act="mic" aria-label="'+esc(u.mic)+'">'+ICON.mic+'</button><div><b>'+esc(u.mic)+'</b></div></div>';
+  h+='<div class="note" id="note" role="status">'+(SR?(micBlocked?esc(u.micDenied+' '+u.micHelp):''):esc(u.noVoice))+'</div>';
+   if(SR&&INSEC)h+='<p class="saved">'+esc(u.micInsecure)+'</p>';
+  h+='<form class="input" id="chatForm" action="#" novalidate><input id="txt" name="q" type="text" maxlength="'+(window.SahelCatalog?.MAX_MESSAGE||500)+'" enterkeyhint="send" placeholder="'+esc(u.ph)+'" aria-label="'+esc(u.ph)+'" autocomplete="off"><button class="send" type="submit">'+esc(u.send)+'</button></form>';
+ }
+ return h;
+}
+
+function saved(){
+ const u=T[cur.lang];
+ let h='<div class="top"><button data-act="home">⬅ '+esc(T[lang].home)+'</button><b>'+esc(fmt(cur.date))+'</b></div>';
+ h+='<div class="log">'+cur.msgs.map((m,i)=>msgEl(m,i,cur.lang)).join('')+'</div>';
+ h+='<div class="note" id="tts" role="status">'+esc(ttsWarn)+'</div>';
+ h+='<div class="chips">'+'<button data-act="listenall">🔊 '+esc(u.listenAll)+'</button><button data-act="stop">⏹ '+esc(u.stop)+'</button>'+'<button type="button" class="del" data-act="del" data-id="'+esc(cur.id)+'" aria-label="'+esc(u.del+': '+fmt(cur.date))+'">🗑 '+esc(u.del)+'</button></div>';
+ return h;
+}
+
+function settings(){
+ const u=ui(),vs=SYN?speechSynthesis.getVoices():[],v=SYN?findVoice(lang):null;
+ let h='<div class="top"><button data-act="home">⬅ '+esc(u.home)+'</button><b>'+esc(u.set)+'</b></div>';
+ h+='<div class="langs" role="group" aria-label="Language">'+['ta','te','en','hi'].map(l=>'<button data-act="lang" data-v="'+l+'" aria-pressed="'+(l===lang)+'">'+NAMES[l]+'</button>').join('')+'</div>';
+ h+='<h2 id="tutH" tabindex="-1">'+esc(u.tut)+'</h2>'+[u.i1,u.i2,u.i3].map(x=>'<div class="card">'+esc(x)+'</div>').join('');
+ const pm={granted:u.pg,prompt:u.pp,denied:u.pd}[micPerm]||u.pu;
+ let L=[!SYN?u.noSyn:v?u.ttsOk+v.name+' ('+v.lang+')':u.noTts,SR?u.srOk:u.noVoice,u.perm+pm];
+ if(micBlocked||micPerm==='denied')L.push(u.micHelp);
+ if(SR&&INSEC)L.push(u.micInsecure);
+ h+='<div class="card"><b>'+esc(u.stT)+'</b><ul class="stl">'+L.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>';
+ h+='<h3>'+esc(u.plat)+'</h3><div class="langs" role="group" aria-label="'+esc(u.plat)+'">'+[['a','Android'],['w','Windows']].map(x=>'<button data-act="plat" data-v="'+x[0]+'" aria-pressed="'+(tplat===x[0])+'">'+x[1]+'</button>').join('')+'</div>';
+ const d=tplat==='a'?u.and:u.win;
+ h+=u.caps.map((c,i)=>'<div class="card step"><h3><span class="num">'+(i+1)+'</span>'+esc(c)+'</h3><svg viewBox="0 0 120 90" role="img" aria-label="'+esc(u.alts[i])+'"><rect x="1" y="1" width="118" height="88" rx="14" fill="#fff" stroke="#BFD9D2" stroke-width="2"/>'+ART[i]+'</svg><p>'+esc(d[i].replace('{T}',u.testVoice).replace('{S}',u.mic))+'</p>'+(i===3?'<button style="width:100%" data-act="test">🔊 '+esc(u.testVoice)+'</button><div class="note" id="tts" role="status">'+esc(ttsWarn)+'</div>':'')+'</div>').join('');
+ return h+'<button class="big" data-act="home">⬅ '+esc(u.home)+'</button>';
+}
+function homeStatus(){
+ if(!SYN)return ui().noSyn;
+ return(speechSynthesis.getVoices().length&&!findVoice(lang))?ui().noTts:'';
+}
+function render(keep){
+ if(view==='home')ttsWarn=homeStatus();
+ $('#app').innerHTML=view==='home'?home():view==='chat'?chat():view==='topics'?topics():view==='settings'?settings():saved();
+ document.documentElement.lang=lang;
+ syncMic();
+ if(keep!==true)window.scrollTo(0,view==='chat'?document.body.scrollHeight:0);
+}
+function go(v){
+ stopAll();ttsWarn='';const prev=view;view=v;
+ try{render()}catch(err){
+  console.error('Screen "'+v+'" failed to render:',err);
+  view=prev==='chat'||prev==='saved'?'home':prev;
+  try{render()}catch(e2){console.error(e2)}
+ }
+}
+function note(t){const n=$('#note');if(n)n.textContent=t}
+
+function newConv(){
+ loadCat(lang);
+ go('topics');
+ const hd=$('#topH');if(hd)hd.focus({preventScroll:true});
+}
+async function handle(text,byVoice,forced){
+ text=text.trim();
+ if(!text||!cur||pending.has(cur))return;
+ const conv=cur,l=conv.lang;
+ conv.msgs.push({r:'user',t:text});
+ if(byVoice)conv.voice=true;
+ if(!conv.stored){convs.unshift(conv);conv.stored=true}
+ persist();stopRecOnly();
+ pending.add(conv);render();
+ let m;
+ try{
+  const sc=forced&&catFor(l).schemes.find(x=>x.id===forced);   // topic button: data already loaded from /api/schemes
+  m=sc?botFromScheme(sc):botFromChat(await askChat(text,l));   // typed or spoken text: POST /api/chat
+ }catch(e){m={t:SahelCatalog.getCatalog(l).retry}}
+ pending.delete(conv);
+ conv.msgs.push(Object.assign({r:'bot'},m));
+ if(m.topic){conv.topic=m.topic;conv.step='done'}
+ persist();
+ if(cur===conv&&view==='chat'){render();speak(fullText(m,l),l)}
+}
+let pendingDel=null,delOpener=null;
+function openDel(id,opener){
+ const c=convs.find(x=>x.id===id);if(!c)return;
+ pendingDel=id;delOpener=opener;
+ const u=T[view==='saved'&&cur?cur.lang:lang];
+ $('#dlgT').textContent=u.delConfirm;
+ $('#dlgD').textContent=fmt(c.date)+' · '+NAMES[c.lang]+' — '+preview(c);
+ $('#dlgCancel').textContent=u.cancel;$('#dlgOk').textContent='🗑 '+u.del;
+ $('#dlg').hidden=false;$('#dlgCancel').focus();
+}
+function closeDel(restore){
+ $('#dlg').hidden=true;pendingDel=null;
+ if(restore&&delOpener&&document.body.contains(delOpener))delOpener.focus();
+ delOpener=null;
+}
+function confirmDel(){
+ const id=pendingDel;if(id===null)return;
+ convs=convs.filter(c=>c.id!==id);   // removes only this conversation
+ persist();
+ closeDel(false);
+ if(cur&&cur.id===id){cur=null;go('home')}else render();
+ const h=$('#prevH');if(h)h.focus();
+}
+function stopRecOnly(){if(micState==='listening'||micState==='starting')haltRec(false)}
+function watchPerm(){
+ try{navigator.permissions.query({name:'microphone'}).then(p=>{
+  micPerm=p.state;if(p.state==='denied')micBlocked=true;
+  p.onchange=()=>{micPerm=p.state;if(p.state!=='denied'){micBlocked=false;if(micState==='idle')note('')}else micBlocked=true;if(view==='settings')render(true)};
+  if(view==='settings')render(true);
+ }).catch(()=>{})}catch(e){}
+}
+function syncMic(){
+ const b=$('#mic');if(!b)return;
+ const on=micState==='listening';
+ b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.setAttribute('aria-busy',micState==='starting'||micState==='stopping');
+ if(cur)b.setAttribute('aria-label',on?T[cur.lang].stop:T[cur.lang].mic);
+}
+function haltRec(abort){
+ if(!recog||micState==='idle')return;
+ micCtx.userStopped=true;micState='stopping';
+ try{abort?recog.abort():recog.stop()}catch(e){}
+ clearTimeout(micTimer);micTimer=setTimeout(()=>{if(micState==='stopping'){micState='idle';syncMic()}},2500);
+ syncMic();
+}
+function getRec(){
+ if(recog)return recog;
+ const r=new SR();r.continuous=false;r.interimResults=false;r.maxAlternatives=1;
+ r.onstart=()=>{micState='listening';syncMic();note('🎤 '+T[micCtx.l].listening)};
+ r.onresult=e=>{
+  const t=(e.results[0]&&e.results[0][0]?e.results[0][0].transcript:'').trim();
+  if(!t){micCtx.failed=true;note(T[micCtx.l].voiceFail);return}
+  micCtx.got=true;handle(t,true);
+ };
+ r.onerror=e=>{
+  const c=e.error,u=T[micCtx.l||'en'];
+  if(c==='aborted')return;
+  micCtx.failed=true;
+  if(c==='not-allowed'||c==='service-not-allowed'){micBlocked=true;note(u.micDenied+' '+u.micHelp)}
+  else note(c==='audio-capture'?u.micNone:c==='network'?u.micNet:c==='language-not-supported'?u.micLang:u.voiceFail);
+ };
+ r.onend=()=>{
+  micState='idle';syncMic();
+  if(!micCtx.got&&!micCtx.failed){note(micCtx.userStopped?'':T[micCtx.l].voiceFail)}
+ };
+ recog=r;return r;
+}
+function mic(){
+ const u=T[cur.lang];
+ if(!SR){note(u.noVoice);return}
+ if(micState==='starting'||micState==='stopping')return;   // no double starts
+ if(micState==='listening'){haltRec(false);return}          // tap again = stop
+ if(micBlocked||micPerm==='denied'){note(u.micDenied+' '+u.micHelp);return}   // never re-prompt
+ stopSpeech();
+ const r=getRec();
+ micCtx={l:cur.lang,got:false,failed:false,userStopped:false};
+ r.lang=LC[cur.lang];
+ micState='starting';syncMic();note('');
+ try{r.start()}catch(e){micState='idle';syncMic();note(u.voiceFail)}
+}
+watchPerm();
+
+document.addEventListener('click',e=>{
+ if(e.target.id==='dlg'){closeDel(true);return}
+ const b=e.target.closest('[data-act]');if(!b)return;
+ const a=b.dataset.act;
+ if(a==='lang'){lang=b.dataset.v;loadCat(lang);try{localStorage.setItem('saheli_lang',lang)}catch(x){}render()}
+ else if(a==='start')newConv();
+ else if(a==='topic')pickTopic(b.dataset.id);
+ else if(a==='ownq')askOwn();
+ else if(a==='home')go('home');
+ else if(a==='chip')handle(b.dataset.v,false,b.dataset.t);
+ else if(a==='mic')mic();
+ else if(a==='open'){cur=convs.find(c=>String(c.id)===b.dataset.id);if(cur)go('saved')}
+ else if(a==='del')openDel(b.dataset.id,b);
+ else if(a==='delcancel')closeDel(true);
+ else if(a==='delok')confirmDel();
+ else if(a==='listen'){const m=cur.msgs[+b.dataset.i];speak(fullText(m,cur.lang),cur.lang)}
+ else if(a==='listenall')speak(cur.msgs.map(m=>fullText(m,cur.lang)).join('. '),cur.lang);
+ else if(a==='stop')stopAll();
+ else if(a==='stopspeak'){stopSpeech();setTts('')}
+ else if(a==='chk'){
+  const i=+b.dataset.i,j=+b.dataset.j,m=cur&&cur.msgs[i];if(!m||!m.docs)return;
+  if(!Array.isArray(m.checked))m.checked=m.docs.map(()=>false);
+  m.checked[j]=!m.checked[j];persist();render(true);
+  const nb=document.querySelector('[data-act="chk"][data-i="'+i+'"][data-j="'+j+'"]');if(nb)nb.focus({preventScroll:true});
+ }
+ else if(a==='copy'||a==='wa'){
+  const m=cur&&cur.msgs[+b.dataset.i];if(!m||!m.docs)return;
+  const l=cur.lang,u=T[l],out=b.closest('.msg').querySelector('.cn'),txt=listText(m,l);
+  if(a==='copy')copyText(txt).then(ok=>{if(out)out.textContent=ok?u.copied:u.copyFail});
+  else{
+   if(out)out.textContent=u.waOpen;
+   const lk=document.createElement('a');lk.href='https://wa.me/?text='+encodeURIComponent(txt);lk.target='_blank';lk.rel='noopener';
+   document.body.appendChild(lk);lk.click();lk.remove();
+  }
+ }
+ else if(a==='test')speak(ui().greet,lang);
+ else if(a==='settings')go('settings');
+ else if(a==='plat'){tplat=b.dataset.v;render(true)}
+});
+document.addEventListener('submit',e=>{
+ e.preventDefault();
+ if(e.target.id==='chatForm'&&cur){const i=e.target.querySelector('#txt');if(!pending.has(cur)){const v=i.value;i.value='';handle(v,false)}}
+});
+if(SYN)speechSynthesis.addEventListener('voiceschanged',()=>{if(view==='home'||view==='settings')render(true)});
+document.addEventListener('keydown',e=>{
+ if(pendingDel!==null){
+  if(e.key==='Escape'){closeDel(true);return}
+  if(e.key==='Tab'){const a=$('#dlgCancel'),o=$('#dlgOk');e.preventDefault();(document.activeElement===a?o:a).focus();return}
+ }
+});
+loadCat(lang);
+render();
+</script>
+</body>
+</html>
